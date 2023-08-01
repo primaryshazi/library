@@ -24,223 +24,490 @@ export namespace szutils {
     }
 
     /**
-    * 时间格式化为字符串 %Y-%M-%D %h:%m:%s.%z
-    * @param ms
-    * @param format
-    * @returns
-    */
-    export function time2str(ms: number, format: string = "%Y-%M-%D %h:%m:%s.%z"): string {
-        if (format.length == 0) {
-            return "";
-        }
+     * 获得某一个比特位的值 [0, 32]
+     * @param num
+     * @param index 从0开始
+     * @returns
+     */
+export function getBitValue(num: number, index: number): number {
+    return (num >> index) & 1;
+}
 
-        let date = new Date(ms);
-
-        return format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, Y, M, D, h, m, s, z) => {
-            if (Y) {
-                return date.getFullYear().toString().padStart(4, "0");
-            } else if (M) {
-                return (date.getMonth() + 1).toString().padStart(2, "0");
-            } else if (D) {
-                return date.getDate().toString().padStart(2, "0");
-            } else if (h) {
-                return date.getHours().toString().padStart(2, "0");
-            } else if (m) {
-                return date.getMinutes().toString().padStart(2, "0");
-            } else if (s) {
-                return date.getSeconds().toString().padStart(2, "0");
-            } else if (z) {
-                return date.getMilliseconds().toString().padStart(3, "0");
-            } else {
-                return match;
-            }
-        });
+/**
+ * 设置某一个比特位的值 [0, 32]
+ * @param num
+ * @param index
+ * @returns
+ */
+export function setBitValue(num: number, index: number, flag: number): number {
+    let value = 1 << index;
+    if (flag == 0) {
+        num &= ~value;
+    } else {
+        num |= value;
     }
+    return num;
+}
 
-    /**
-    * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
-    * @param str
-    * @param format
-    * @returns
-    */
-    export function str2date(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): Date {
-        if (str.length == 0 || format.length == 0) {
-            return new Date(0);
-        }
+/**
+ * 获得某一区间比特位的值 [0, 32]
+ * @param num
+ * @param index 从0开始
+ * @returns
+ */
+export function getBitSec(num: number, beg: number, end: number): number {
+    return Number(getBitSecBigInt(BigInt(num), beg, end));
+}
 
-        let mapIndex = new Map<number, number>();
+/**
+ * 设置某一区间比特位的值 [0, 32]
+ * @param num
+ * @param beg
+ * @param end
+ * @param flag
+ * @returns
+ */
+export function setBitSec(num: number, beg: number, end: number, flag: number): number {
+    return Number(setBitSecBigInt(BigInt(num), beg, end, flag));
+}
 
-        let index: number = 1;
-        let regFormat: string = format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)|(\()|(\))|(\\)|(\[)|(\])|(\^)|(\$)|(\?)|(\+)|(\|)/g,
-            (match, Y, M, D, h, m, s, z, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10) => {
-                if (Y) {
-                    mapIndex.set(1, index);
-                    index++;
-                    return "(\\d{4})";
-                } else if (M) {
-                    mapIndex.set(2, index);
-                    index++;
-                    return "(\\d{2})";
-                } else if (D) {
-                    mapIndex.set(3, index);
-                    index++;
-                    return "(\\d{2})";
-                } else if (h) {
-                    mapIndex.set(4, index);
-                    index++;
-                    return "(\\d{2})";
-                } else if (m) {
-                    mapIndex.set(5, index);
-                    index++;
-                    return "(\\d{2})";
-                } else if (s) {
-                    mapIndex.set(6, index);
-                    index++;
-                    return "(\\d{2})";
-                } else if (z) {
-                    mapIndex.set(7, index);
-                    index++;
-                    return "(\\d{3})";
-                } else if (x1) {
-                    return "\\(";
-                } else if (x2) {
-                    return "\\)";
-                } else if (x3) {
-                    return "\\\\";
-                } else if (x4) {
-                    return "\\[";
-                } else if (x5) {
-                    return "\\]";
-                } else if (x6) {
-                    return "\\^";
-                } else if (x7) {
-                    return "\\$";
-                } else if (x8) {
-                    return "\\?";
-                } else if (x9) {
-                    return "\\+";
-                } else if (x10) {
-                    return "\\|";
-                }
+/**
+ * 获得某一个比特位的值 [0, 1024]
+ * @param num
+ * @param index 从0开始
+ * @returns 返回指定位的值
+ */
+export function getBitValueBigInt(num: bigint, index: number): number {
+    return Number((num >> BigInt(index)) & BigInt(1));
+}
 
-                return match;
-            });
-
-        let reg = new RegExp(regFormat);
-        let result = reg.exec(str);
-        if (result == null) {
-            return new Date(0);
-        }
-
-        let year: number = 0;
-        let month: number = 0;
-        let day: number = 0;
-        let hour: number = 0;
-        let minute: number = 0;
-        let second: number = 0;
-        let micsecond: number = 0;
-        for (let [p, i] of mapIndex) {
-            switch (p) {
-                case 1: {
-                    year = parseInt(result[i]);
-                    break;
-                }
-                case 2: {
-                    month = parseInt(result[i]) - 1;
-                    break;
-                }
-                case 3: {
-                    day = parseInt(result[i]);
-                    break;
-                }
-                case 4: {
-                    hour = parseInt(result[i]);
-                    break;
-                }
-                case 5: {
-                    minute = parseInt(result[i]);
-                    break;
-                }
-                case 6: {
-                    second = parseInt(result[i]);
-                    break;
-                }
-                case 7: {
-                    micsecond = parseInt(result[i]);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-
-        return new Date(year, month, day, hour, minute, second, micsecond);
+/**
+ * 设置某一个比特位的值 [0, 1024]
+ * @param num
+ * @param index 从0开始
+ * @returns 返回修改后的num
+ */
+export function setBitValueBigInt(num: bigint, index: number, flag: number): bigint {
+    let value: bigint = BigInt(0x01) << BigInt(index);
+    if (flag == 0) {
+        num &= ~value;
+    } else {
+        num |= value;
     }
+    return num;
+}
 
-    /**
-    * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
-    * @param str
-    * @param format
-    * @returns
-    */
-    export function str2time(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): number {
-        let dt = str2date(str, format).getTime();
-        return dt;
+/**
+ * 获得某一区间比特位的值 [0, 1024]
+ * @param num
+ * @param index 从0开始
+ * @returns
+ */
+export function getBitSecBigInt(num: bigint, beg: number, end: number): bigint {
+    let one = BigInt(0x01);
+    let bbeg = BigInt(beg);
+    let bend = BigInt(end);
+    return (num >> bbeg) & ((one << (bend - bbeg + one)) - one);
+}
+
+/**
+ * 设置某一区间比特位的值 [0, 1024]
+ * @param num
+ * @param beg
+ * @param end
+ * @param flag
+ * @returns
+ */
+export function setBitSecBigInt(num: bigint, beg: number, end: number, flag: number): bigint {
+    let one = BigInt(0x01);
+    let bbeg = BigInt(beg);
+    let bend = BigInt(end);
+    let value = beg == end ? (one << bbeg) : (((one << bbeg) - one) ^ ((one << bend + one) - one));
+    if (flag == 0) {
+        num &= ~value;
+    } else {
+        num |= value;
     }
+    return num;
+}
 
-    /**
-     * 以{d}这种形式来替换字符串，{0}表示第一个参数 {1}表示第二个参数，依次类推
+/**
+ * 以{d}这种形式来替换字符串，{0}表示第一个参数 {1}表示第二个参数，依次类推
+ * @param str
+ * @param args
+ */
+export function stringFormat(str: string, ...args: any[]) {
+    return str.replace(/\{(\d+)\}/g, (match, index) => {
+        return typeof args[index] !== "undefined" ? args[index] : match;
+    });
+}
+
+/**
+     * 右填充字符串
      * @param str
-     * @param args
+     * @param length
+     * @param sub
+     * @returns
      */
-    export function stringFormat(str: string, ...args: any[]) {
-        for (let i = 0; i < args.length; i++) {
-            let pattern = new RegExp("\\{" + i + "\\}", "g")
-            str = str.replace(pattern, args[i].toString());
-        }
-        return str;
+export function rightFillString(str: string, length: number, sub: string): string {
+    while (str.length < length) {
+        str = str + sub;
+    }
+    return str;
+}
+
+/**
+ * 左填充字符串
+ * @param str
+ * @param length
+ * @param sub
+ * @returns
+ */
+export function leftFillString(str: string, length: number, sub: string): string {
+    while (str.length < length) {
+        str = sub + str;
+    }
+    return str;
+}
+
+/**
+ * 倒计时格式化
+ * @param ms
+ * @param format
+ * @returns
+ */
+export function countdownFormat(ms: number, format: string = "%D %h:%m:%s.%z") {
+    if (format.length == 0) {
+        return "";
     }
 
-    /**
-     * 比较函数
-     * @param a
-     * @param b
-     * @returns 0:a等于b; -1:a小于b; 1:a大于b
-     */
-    export function compareCondition<T>(a: T, b: T): number {
-        if (a === b) {
-            return 0;
-        } else if (a < b) {
-            return -1;
+    const s = Math.floor(ms / 1000);
+
+    let day = Math.floor(s / 86400);
+    let hour = Math.floor(s % 86400 / 3600);
+    let min = Math.floor(s % 3600 / 60);
+    let second = s % 60;
+    let micsecond = ms % 1000;
+
+    return format.replace(/(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, D, h, m, s, z) => {
+        if (D) {
+            return day.toString();
+        } else if (h) {
+            return leftFillString(hour.toString(), 2, "0");
+        } else if (m) {
+            return leftFillString(min.toString(), 2, "0");
+        } else if (s) {
+            return leftFillString(second.toString(), 2, "0");
+        } else if (z) {
+            return leftFillString(micsecond.toString(), 3, "0");
         } else {
-            return 1;
+            return match;
         }
+    });
+}
+
+/**
+ * 时间格式化为字符串 %Y-%M-%D %h:%m:%s.%z
+ * @param ms
+ * @param format
+ * @returns
+ */
+export function time2str(ms: number, format: string = "%Y-%M-%D %h:%m:%s.%z"): string {
+    if (format.length == 0) {
+        return "";
     }
 
-    /**
-     * 二分法搜索
-     * @param arr
-     * @param target
-     * @param conditon 0:a等于b; -1:a小于b; 1:a大于b
-     * @returns -1:未找到 >0:找到
-     */
-    export function binarySearch<T>(arr: T[], target: T, conditon: (a: T, b: T) => number = szutils.compareCondition): number {
-        let left = 0;
-        let right = arr.length - 1;
+    let date = new Date(ms);
 
-        while (left <= right) {
-            const mid = Math.floor((left + right) / 2);
+    return format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, Y, M, D, h, m, s, z) => {
+        if (Y) {
+            return leftFillString(date.getFullYear().toString(), 4, "0");
+        } else if (M) {
+            return leftFillString((date.getMonth() + 1).toString(), 2, "0");
+        } else if (D) {
+            return leftFillString(date.getDate().toString(), 2, "0");
+        } else if (h) {
+            return leftFillString(date.getHours().toString(), 2, "0");
+        } else if (m) {
+            return leftFillString(date.getMinutes().toString(), 2, "0");
+        } else if (s) {
+            return leftFillString(date.getSeconds().toString(), 2, "0");
+        } else if (z) {
+            return leftFillString(date.getMilliseconds().toString(), 3, "0");
+        } else {
+            return match;
+        }
+    });
+}
 
-            let cond = conditon(arr[mid], target);
-            if (0 == cond) {
-                return mid;
-            } else if (-1 == cond) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
+/**
+ * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
+ * @param str
+ * @param format
+ * @returns
+ */
+export function str2date(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): Date {
+    if (str.length == 0 || format.length == 0) {
+        return new Date(0);
+    }
+
+    let mIdx = new Map<number, number>();
+
+    let index: number = 1;
+    let regFormat: string = format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)|(\\)|(\()|(\))|(\[)|(\])|(\{)|(\})|(\^)|(\$)|(\?)|(\+)|(\|)|(\*)/g,
+        (match, Y, M, D, h, m, s, z, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13) => {
+            if (Y) {
+                mIdx.set(1, index);
+                index++;
+                return "(\\d{4})";
+            } else if (M) {
+                mIdx.set(2, index);
+                index++;
+                return "(\\d{2})";
+            } else if (D) {
+                mIdx.set(3, index);
+                index++;
+                return "(\\d{2})";
+            } else if (h) {
+                mIdx.set(4, index);
+                index++;
+                return "(\\d{2})";
+            } else if (m) {
+                mIdx.set(5, index);
+                index++;
+                return "(\\d{2})";
+            } else if (s) {
+                mIdx.set(6, index);
+                index++;
+                return "(\\d{2})";
+            } else if (z) {
+                mIdx.set(7, index);
+                index++;
+                return "(\\d{3})";
+            } else if (x1) {
+                return "\\\\";
+            } else if (x2) {
+                return "\\(";
+            } else if (x3) {
+                return "\\)";
+            } else if (x4) {
+                return "\\[";
+            } else if (x5) {
+                return "\\]";
+            } else if (x6) {
+                return "\\{";
+            } else if (x7) {
+                return "\\}"
+            } else if (x8) {
+                return "\\^";
+            } else if (x9) {
+                return "\\$";
+            } else if (x10) {
+                return "\\?";
+            } else if (x11) {
+                return "\\+";
+            } else if (x12) {
+                return "\\|";
+            } else if (x13) {
+                return "\\*"
             }
-        }
 
-        return -1;
+            return match;
+        });
+
+    let reg = new RegExp(regFormat);
+    let result = reg.exec(str);
+    if (result == null) {
+        return new Date(0);
     }
+
+    let year: number = 0;
+    let month: number = 0;
+    let day: number = 0;
+    let hour: number = 0;
+    let minute: number = 0;
+    let second: number = 0;
+    let micsecond: number = 0;
+    for (let [p, i] of mIdx) {
+        switch (p) {
+            case 1: {
+                year = parseInt(result[i]);
+                break;
+            }
+            case 2: {
+                month = parseInt(result[i]) - 1;
+                break;
+            }
+            case 3: {
+                day = parseInt(result[i]);
+                break;
+            }
+            case 4: {
+                hour = parseInt(result[i]);
+                break;
+            }
+            case 5: {
+                minute = parseInt(result[i]);
+                break;
+            }
+            case 6: {
+                second = parseInt(result[i]);
+                break;
+            }
+            case 7: {
+                micsecond = parseInt(result[i]);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    return new Date(year, month, day, hour, minute, second, micsecond);
+}
+
+/**
+ * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
+ * @param str
+ * @param format
+ * @returns
+ */
+export function str2time(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): number {
+    let dt = str2date(str, format).getTime();
+    return dt;
+}
+
+/**
+ * 获取当前年份
+ * @param ms
+ * @returns 9999
+ */
+export function getYear(ms: number): number {
+    let dt = new Date(ms);
+    let cur = dt.getFullYear();
+    return Math.max(1970, Math.min(9999, cur));
+}
+
+/**
+ * 获取下一年
+ * @param ms
+ * @returns [1970, 9999]
+ */
+export function getNextYear(ms: number): number {
+    let cur = getYear(ms);
+    if (cur >= 9999) {
+        return 9999;
+    } else if (cur < 1970) {
+        return 1970;
+    }
+    return cur + 1;
+}
+
+/**
+ * 获取上一年
+ * @param ms
+ * @returns [1970, 9999]
+ */
+export function getPrevYear(ms: number): number {
+    let cur = getYear(ms);
+    if (cur > 9999) {
+        return 9999;
+    } else if (cur <= 1970) {
+        return 1970;
+    }
+    return cur - 1;
+}
+
+/**
+ * 获取当前月份
+ * @param ms
+ * @returns 202201
+ */
+export function getMonth(ms: number): number {
+    let dt = new Date(ms);
+    let cur = dt.getFullYear() * 100 + (dt.getMonth() + 1);
+    return Math.max(197001, Math.min(999912, cur));
+}
+
+/**
+ * 获取下一月
+ * @param ms
+ * @returns [197001, 999912]
+ */
+export function getNextMonth(ms: number): number {
+    let cur = getMonth(ms);
+    if (cur >= 999912) {
+        return 999912;
+    } else if (cur < 197001) {
+        return 197001;
+    }
+
+    let year = Math.floor(cur / 100);
+    let month = cur % 100;
+
+    if (month >= 12) {
+        year += 1;
+        month = 1;
+    } else {
+        month += 1;
+    }
+
+    return year * 100 + month;
+}
+
+/**
+ * 获取上一月
+ * @param ms
+ * @returns [197001, 999912]
+ */
+export function getPrevMonth(ms: number): number {
+    let cur = getMonth(ms);
+    if (cur > 999912) {
+        return 999912;
+    } else if (cur <= 197001) {
+        return 197001;
+    }
+
+    let year = Math.floor(cur / 100);
+    let month = cur % 100;
+
+    if (month <= 1) {
+        year -= 1;
+        month = 12;
+    } else {
+        month -= 1;
+    }
+
+    return year * 100 + month;
+}
+
+/**
+ * 获取当前日期
+ * @param ms
+ * @returns
+ */
+export function getDay(ms: number): number {
+    let dt = new Date(ms);
+    let cur = dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+    return Math.max(19700101, Math.min(99991231, cur));
+}
+
+/**
+ * 获取下一天
+ * @param ms
+ * @returns [1970, 9999]
+ */
+export function getNextDay(ms: number): number {
+    let cur = getDay(ms + 86400000);
+    return Math.max(19700101, Math.min(99991231, cur));
+}
+
+/**
+ * 获取上一天
+ * @param ms
+ * @returns [1970, 9999]
+ */
+export function getPrevDay(ms: number): number {
+    let cur = getDay(ms - 86400000);
+    return Math.max(19700101, Math.min(99991231, cur));
 }
