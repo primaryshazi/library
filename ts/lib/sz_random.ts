@@ -1,5 +1,4 @@
-namespace szrandom {
-  /**
+/**
  * 线性同余随机数生成
  * 默认范围[0, 1)
  */
@@ -328,5 +327,3 @@ export class IntegerListDistributionGenerator {
         return result;
     }
 }
-  
-} // namespace szrandom
