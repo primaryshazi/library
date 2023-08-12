@@ -25,11 +25,11 @@ export namespace szutils {
 
 
     /**
-         * 获得某一个比特位的值 [0, 32]
-         * @param num
-         * @param index 从0开始
-         * @returns
-         */
+     * 获得某一个比特位的值 [0, 32]
+     * @param num
+     * @param index 从0开始
+     * @returns
+     */
     export function getBitValue(num: number, index: number): number {
         return (num >> index) & 1;
     }
@@ -187,40 +187,12 @@ export namespace szutils {
     }
 
     /**
-         * 右填充字符串
-         * @param str
-         * @param length
-         * @param sub
-         * @returns
-         */
-    export function rightFillString(str: string, length: number, sub: string): string {
-        while (str.length < length) {
-            str = str + sub;
-        }
-        return str;
-    }
-
-    /**
-     * 左填充字符串
-     * @param str
-     * @param length
-     * @param sub
-     * @returns
-     */
-    export function leftFillString(str: string, length: number, sub: string): string {
-        while (str.length < length) {
-            str = sub + str;
-        }
-        return str;
-    }
-
-    /**
-     * 倒计时格式化
+     * 倒计时格式化 
      * @param ms
-     * @param format
+     * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
      */
-    export function countdownFormat(ms: number, format: string = "%D %h:%m:%s.%z") {
+    export function countdownFormat(ms: number, format: string = "%D %h:%m:%s") {
         if (format.length == 0) {
             return "";
         }
@@ -237,13 +209,13 @@ export namespace szutils {
             if (D) {
                 return day.toString();
             } else if (h) {
-                return leftFillString(hour.toString(), 2, "0");
+                return hour.toString().padStart(2, "0");
             } else if (m) {
-                return leftFillString(min.toString(), 2, "0");
+                return min.toString().padStart(2, "0");
             } else if (s) {
-                return leftFillString(second.toString(), 2, "0");
+                return second.toString().padStart(2, "0");
             } else if (z) {
-                return leftFillString(micsecond.toString(), 3, "0");
+                return micsecond.toString().padStart(3, "0");
             } else {
                 return match;
             }
@@ -251,12 +223,12 @@ export namespace szutils {
     }
 
     /**
-     * 时间格式化为字符串 %Y-%M-%D %h:%m:%s.%z
+     * 时间格式化为字符串
      * @param ms
-     * @param format
+     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
      */
-    export function time2str(ms: number, format: string = "%Y-%M-%D %h:%m:%s.%z"): string {
+    export function time2str(ms: number, format: string = "%Y-%M-%D %h:%m:%s"): string {
         if (format.length == 0) {
             return "";
         }
@@ -265,19 +237,19 @@ export namespace szutils {
 
         return format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, Y, M, D, h, m, s, z) => {
             if (Y) {
-                return leftFillString(date.getFullYear().toString(), 4, "0");
+                return date.getUTCFullYear().toString().padStart(4, "0");
             } else if (M) {
-                return leftFillString((date.getMonth() + 1).toString(), 2, "0");
+                return (date.getUTCMonth() + 1).toString().padStart(2, "0");
             } else if (D) {
-                return leftFillString(date.getDate().toString(), 2, "0");
+                return date.getUTCDate().toString().padStart(2, "0");
             } else if (h) {
-                return leftFillString(date.getHours().toString(), 2, "0");
+                return date.getUTCHours().toString().padStart(2, "0");
             } else if (m) {
-                return leftFillString(date.getMinutes().toString(), 2, "0");
+                return date.getUTCMinutes().toString().padStart(2, "0");
             } else if (s) {
-                return leftFillString(date.getSeconds().toString(), 2, "0");
+                return date.getUTCSeconds().toString().padStart(2, "0");
             } else if (z) {
-                return leftFillString(date.getMilliseconds().toString(), 3, "0");
+                return date.getUTCMilliseconds().toString().padStart(3, "0");
             } else {
                 return match;
             }
@@ -285,12 +257,12 @@ export namespace szutils {
     }
 
     /**
-     * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
+     * 字符串反格式化为时间
      * @param str
-     * @param format
+     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
      */
-    export function str2date(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): Date {
+    export function str2date(str: string, format: string = "%Y-%M-%D %h:%m:%s"): Date {
         if (str.length == 0 || format.length == 0) {
             return new Date(0);
         }
@@ -407,16 +379,16 @@ export namespace szutils {
             }
         }
 
-        return new Date(year, month, day, hour, minute, second, micsecond);
+        return new Date(Date.UTC(year, month, day, hour, minute, second, micsecond));
     }
 
     /**
-     * 字符串反格式化为时间 %Y-%M-%D %h:%m:%s.%z
+     * 字符串反格式化为时间
      * @param str
-     * @param format
+     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
      */
-    export function str2time(str: string, format: string = "%Y-%M-%D %h:%m:%s.%z"): number {
+    export function str2time(str: string, format: string = "%Y-%M-%D %h:%m:%s"): number {
         let dt = str2date(str, format).getTime();
         return dt;
     }
@@ -428,7 +400,7 @@ export namespace szutils {
      */
     export function getYear(ms: number): number {
         let dt = new Date(ms);
-        let cur = dt.getFullYear();
+        let cur = dt.getUTCFullYear();
         return Math.max(1970, Math.min(9999, cur));
     }
 
@@ -469,7 +441,7 @@ export namespace szutils {
      */
     export function getMonth(ms: number): number {
         let dt = new Date(ms);
-        let cur = dt.getFullYear() * 100 + (dt.getMonth() + 1);
+        let cur = dt.getUTCFullYear() * 100 + (dt.getUTCMonth() + 1);
         return Math.max(197001, Math.min(999912, cur));
     }
 
@@ -532,7 +504,7 @@ export namespace szutils {
      */
     export function getDay(ms: number): number {
         let dt = new Date(ms);
-        let cur = dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+        let cur = dt.getUTCFullYear() * 10000 + (dt.getUTCMonth() + 1) * 100 + dt.getUTCDate();
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
