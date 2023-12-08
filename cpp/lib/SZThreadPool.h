@@ -1,8 +1,7 @@
-#ifndef SZLIBRARY_SZTHREADPOOL_H
-#define SZLIBRARY_SZTHREADPOOL_H
+#pragma once
 
-#include "SZUncopy.h"
 #include "SZCommon.h"
+#include "SZUtility.h"
 #include "SZThreadQueue.h"
 
 #include <thread>
@@ -12,150 +11,257 @@
 #include <condition_variable>
 #include <functional>
 #include <vector>
+#include <iostream>
 
-namespace SZ
+class SZ_ThreadPool_Exception : public SZ_Exception
 {
+public:
+	SZ_ThreadPool_Exception(const std::string &sErr) : SZ_Exception(__FUNCTION__, sErr) {}
+	virtual ~SZ_ThreadPool_Exception() noexcept {}
+};
 
 class SZ_ThreadPool : public SZ_Uncopy
 {
 public:
-    SZ_ThreadPool();
+	typedef std::shared_ptr<std::function<void()>> TaskFuncPtr;
 
-    ~SZ_ThreadPool();
+public:
+	SZ_ThreadPool() : isStart_(false), poolNum_(0), activeNum_(0)
+	{
+	}
 
-    /**
-     * @brief 向线程池中加入任务，不限时
-     *
-     * @tparam Func
-     * @tparam Args
-     * @param func
-     * @param args
-     * @return std::future<decltype(func(args...))>
-     */
-    template <typename Func, typename... Args>
-    auto insert(Func &&func, Args &&...args)->std::future<decltype(func(args...))>;
+	~SZ_ThreadPool()
+	{
+		stop();
+	}
 
-    /**
-     * @brief 向线程池中加入任务，限时
-     *
-     * @tparam Func
-     * @tparam Args
-     * @param timeout
-     * @param func
-     * @param args
-     * @return std::future<decltype(func(args...))>
-     */
-    template <typename Func, typename... Args>
-    auto insert(int64_t timeout, Func &&func, Args &&...args)->std::future<decltype(func(args...))>;
+	/**
+	 * @brief
+	 *
+	 * @param num
+	 */
+	void start(size_t num = 0)
+	{
+		std::lock_guard<std::mutex> locker(poolMtx_);
+		if (isStart_.exchange(true))
+		{
+			return;
+		}
 
-    /**
-     * @brief 启动线程池，不可连续多次启动一个线程池，可停止之后重启
-     *
-     * @param num
-     */
-    void start(size_t num = 4);
+		poolNum_ = num == 0 ? std::thread::hardware_concurrency() : num;
 
-    /**
-     * @brief 停止线程池
-     */
-    void stop();
+		vThreads_.clear();
+		for (size_t i = 0; i < poolNum_.load(); i++)
+		{
+			vThreads_.emplace_back(std::thread(&SZ_ThreadPool::run, this));
+		}
+	}
 
-    /**
-     * @brief 等待任务执行完成
-     *
-     * @param timeout
-     */
-    void wait(int64_t timeout = -1);
+	/**
+	 * @brief
+	 *
+	 */
+	void stop()
+	{
+		std::lock_guard<std::mutex> locker(poolMtx_);
+		if (!isStart_.exchange(false))
+		{
+			return;
+		}
 
-    /**
-     * @brief 获取线程池大小
-     *
-     * @return size_t
-     */
-    size_t pools() const;
+		for (auto &t : vThreads_)
+		{
+			if (t.joinable())
+			{
+				t.join();
+			}
+		}
+		vThreads_.clear();
+	}
 
-    /**
-     * @brief 获取任务列队中的任务的数量
-     *
-     * @return size_t
-     */
-    size_t tasks() const;
+	/**
+	 * @brief
+	 *
+	 * @param timeout
+	 */
+	void wait(int64_t timeout = -1)
+	{
+		std::unique_lock<std::mutex> locker(poolMtx_);
+		if (!isStart_.load())
+		{
+			return;
+		}
 
-    /**
-     * @brief 获取正在执行的线程数量
-     *
-     * @return size_t
-     */
-    size_t actives() const;
+		if (0 == activeNum_.load() && queTasks_.isEmpty())
+		{
+			return;
+		}
 
-    /**
-     * @brief 线程池是否已启动
-     *
-     * @return bool
-     */
-    bool isStarted() const;
+		if (timeout < 0)
+		{
+			poolCond_.wait(locker, [&]()
+						   { return 0 == activeNum_.load() && queTasks_.isEmpty(); });
+		}
+		else if (timeout > 0)
+		{
+			poolCond_.wait_for(locker, std::chrono::milliseconds(timeout), [&]()
+							   { return 0 == activeNum_.load() && queTasks_.isEmpty(); });
+		}
+	}
 
-    /**
-     * @brief 设置/获取队列容量
-     *
-     * @param cap
-     * @return size_t
-     */
-    size_t capacity(size_t cap = 0);
+	/**
+	 * @brief
+	 *
+	 * @tparam Func
+	 * @tparam Args
+	 * @param func
+	 * @param args
+	 * @return std::future<decltype(func(args...))>
+	 */
+	template <typename Func, typename... Args>
+	auto insert(Func &&func, Args &&...args) -> std::future<decltype(func(args...))>
+	{
+		using func_ret_type = decltype(func(args...));
+
+		auto spTask = std::make_shared<std::packaged_task<func_ret_type()>>(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
+		TaskFuncPtr task = std::make_shared<std::function<void()>>([spTask]()
+																   { (*spTask)(); });
+
+		while (!queTasks_.push(task))
+		{
+			std::this_thread::yield();
+		}
+
+		return spTask->get_future();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @tparam Func
+	 * @tparam Args
+	 * @param func
+	 * @param args
+	 * @return std::future<decltype(func(args...))>
+	 */
+	template <typename Func, typename... Args>
+	auto try_insert(Func &&func, Args &&...args) -> std::future<decltype(func(args...))>
+	{
+		using func_ret_type = decltype(func(args...));
+
+		auto spTask = std::make_shared<std::packaged_task<func_ret_type()>>(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
+		TaskFuncPtr task = std::make_shared<std::function<void()>>([spTask]()
+																   { (*spTask)(); });
+		queTasks_.push(task);
+
+		return spTask->get_future();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @return size_t
+	 */
+	size_t pools() const
+	{
+		return poolNum_.load();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @return size_t
+	 */
+	size_t tasks() const
+	{
+		return queTasks_.size();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @return size_t
+	 */
+	size_t actives() const
+	{
+		return activeNum_.load();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @return bool
+	 */
+	bool isStarted() const
+	{
+		return isStart_.load();
+	}
+
+	/**
+	 * @brief
+	 *
+	 * @param cap
+	 * @return size_t
+	 */
+	size_t capacity(size_t cap = 0)
+	{
+		return queTasks_.capacity(cap);
+	}
 
 protected:
-    /**
-     * @brief 启动每一条线程
-     */
-    void run();
+	/**
+	 * @brief
+	 */
+	void run()
+	{
+		TaskFuncPtr task = nullptr;
+
+		while (isStart_.load())
+		{
+			if (!queTasks_.pop(task, 5))
+			{
+				if (0 == activeNum_.load() && queTasks_.isEmpty())
+				{
+					poolCond_.notify_all();
+				}
+				continue;
+			}
+
+			++activeNum_;
+			try
+			{
+				if (task)
+				{
+					(*task)();
+					task = nullptr;
+				}
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << SZ_FILE_FUNC_LINE << e.what() << "\n";
+			}
+			catch (...)
+			{
+				std::cerr << SZ_FILE_FUNC_LINE << "unknown exception"
+						  << "\n";
+			}
+			--activeNum_;
+
+			if (0 == activeNum_.load() && queTasks_.isEmpty())
+			{
+				poolCond_.notify_all();
+			}
+		}
+	}
 
 private:
-    class TaskFunc
-    {
-    public:
-        TaskFunc(int64_t expire, std::function<void()> func) : expire_(expire), func_(func) {}
+	std::mutex poolMtx_;
+	std::condition_variable poolCond_;
+	std::atomic_bool isStart_;
 
-        ~TaskFunc() {}
+	std::atomic_size_t poolNum_;
+	std::atomic_size_t activeNum_;
 
-    public:
-        int64_t expire_;               // 过期时间
-        std::function<void()> func_;    // 执行函数
-    };
-
-    typedef std::shared_ptr<TaskFunc> TaskFuncPtr;
-
-private:
-    std::mutex poolMtx_;                // 启停保护
-    std::condition_variable poolCond_;  // 启停通知
-    std::atomic_bool isStart_;          // 线程池启动标识
-
-    std::atomic_size_t poolNum_;        // 线程数量
-    std::atomic_size_t activeNum_;      // 活跃线程数量
-
-    std::vector<std::thread> vThreads_;     // 线程池中的线程
-    SZ_ThreadQueue<TaskFuncPtr> queTasks_;      // 任务队列
+	std::vector<std::thread> vThreads_;
+	SZ_ThreadQueue<TaskFuncPtr> queTasks_;
 };
-
-template <typename Func, typename... Args>
-auto SZ_ThreadPool::insert(Func &&func, Args &&...args)->std::future<decltype(func(args...))>
-{
-    return insert(0, func, args...);
-}
-
-template <typename Func, typename... Args>
-auto SZ_ThreadPool::insert(int64_t timeout, Func &&func, Args &&...args)->std::future<decltype(func(args...))>
-{
-    using func_ret_type = decltype(func(args...));
-
-    // 将任务函数的参数原封不动的绑定到任务函数上，并任务封包
-    auto spTask = std::make_shared<std::packaged_task<func_ret_type()>>(std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
-    TaskFuncPtr ptr = std::make_shared<TaskFunc>(timeout <= 0 ? 0 : timeout + SZ_Common::nowms(), [spTask]() { (*spTask)(); });
-
-    queTasks_.push(ptr);
-
-    return spTask->get_future();
-}
-
-} // namespace SZ
-
-#endif // SZLIBRARY_SZTHREADPOOL_H

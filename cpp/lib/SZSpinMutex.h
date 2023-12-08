@@ -1,12 +1,8 @@
-#ifndef SZLIBRARY_SZSPINMUTEX_H
-#define SZLIBRARY_SZSPINMUTEX_H
+#pragma once
 
-#include "SZUncopy.h"
+#include "SZUtility.h"
 
 #include <atomic>
-
-namespace SZ
-{
 
 class SZ_SpinMutex : public SZ_Uncopy
 {
@@ -24,7 +20,3 @@ public:
 private:
     std::atomic_flag flag_;
 };
-
-} // namespace sZ
-
-#endif  // SZLIBRARY_SZSPINMUTEX_H

@@ -1,36 +1,29 @@
 #include "SZMD5.h"
 
-namespace SZ
-{
-
 #ifndef SZ_MD5_GET_ULONG_LE
-#define SZ_MD5_GET_ULONG_LE(n, b, i)                           \
-{                                                       \
-    (n) = ( (unsigned long) (b)[(i)    ]       )        \
-        | ( (unsigned long) (b)[(i) + 1] <<  8 )        \
-        | ( (unsigned long) (b)[(i) + 2] << 16 )        \
-        | ( (unsigned long) (b)[(i) + 3] << 24 );       \
-}
+#define SZ_MD5_GET_ULONG_LE(n, b, i)                                                                                                                      \
+    {                                                                                                                                                     \
+        (n) = ((unsigned long)(b)[(i)]) | ((unsigned long)(b)[(i) + 1] << 8) | ((unsigned long)(b)[(i) + 2] << 16) | ((unsigned long)(b)[(i) + 3] << 24); \
+    }
 #endif
 
 #ifndef SZ_MD5_PUT_ULONG_LE
-#define SZ_MD5_PUT_ULONG_LE(n, b, i)                           \
-{                                                       \
-    (b)[(i)    ] = (unsigned char) ( (n)       );       \
-    (b)[(i) + 1] = (unsigned char) ( (n) >>  8 );       \
-    (b)[(i) + 2] = (unsigned char) ( (n) >> 16 );       \
-    (b)[(i) + 3] = (unsigned char) ( (n) >> 24 );       \
-}
+#define SZ_MD5_PUT_ULONG_LE(n, b, i)               \
+    {                                              \
+        (b)[(i)] = (unsigned char)((n));           \
+        (b)[(i) + 1] = (unsigned char)((n) >> 8);  \
+        (b)[(i) + 2] = (unsigned char)((n) >> 16); \
+        (b)[(i) + 3] = (unsigned char)((n) >> 24); \
+    }
 #endif
 
-#define SZ_MD5_ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#define SZ_MD5_ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
 unsigned char SZ_MD5::PADDING_[64] =
-{
-    0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+    {
+        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 void SZ_MD5::md5init(MD5_CTX *context)
 {
@@ -62,11 +55,12 @@ void SZ_MD5::md5process(MD5_CTX *context, const unsigned char data[64])
     SZ_MD5_GET_ULONG_LE(X[14], data, 56);
     SZ_MD5_GET_ULONG_LE(X[15], data, 60);
 
-#define SZ_MD5_S_DEAL(x,n) ((x << n) | ((x & 0xFFFFFFFF) >> (32 - n)))
+#define SZ_MD5_S_DEAL(x, n) ((x << n) | ((x & 0xFFFFFFFF) >> (32 - n)))
 
-#define SZ_MD5_P_DEAL(a, b, c, d, k, s, t)                      \
-    {                                               \
-        a += SZ_MD5_F_DEAL(b,c,d) + X[k] + t; a = SZ_MD5_S_DEAL(a,s) + b;   \
+#define SZ_MD5_P_DEAL(a, b, c, d, k, s, t)      \
+    {                                           \
+        a += SZ_MD5_F_DEAL(b, c, d) + X[k] + t; \
+        a = SZ_MD5_S_DEAL(a, s) + b;            \
     }
 
     A = context->state[0];
@@ -95,7 +89,7 @@ void SZ_MD5::md5process(MD5_CTX *context, const unsigned char data[64])
 
 #undef SZ_MD5_F_DEAL
 
-#define SZ_MD5_F_DEAL(x,y,z) (y ^ (z & (x ^ y)))
+#define SZ_MD5_F_DEAL(x, y, z) (y ^ (z & (x ^ y)))
 
     SZ_MD5_P_DEAL(A, B, C, D, 1, 5, 0xF61E2562);
     SZ_MD5_P_DEAL(D, A, B, C, 6, 9, 0xC040B340);
@@ -116,7 +110,7 @@ void SZ_MD5::md5process(MD5_CTX *context, const unsigned char data[64])
 
 #undef SZ_MD5_F_DEAL
 
-#define SZ_MD5_F_DEAL(x,y,z) (x ^ y ^ z)
+#define SZ_MD5_F_DEAL(x, y, z) (x ^ y ^ z)
 
     SZ_MD5_P_DEAL(A, B, C, D, 5, 4, 0xFFFA3942);
     SZ_MD5_P_DEAL(D, A, B, C, 8, 11, 0x8771F681);
@@ -137,7 +131,7 @@ void SZ_MD5::md5process(MD5_CTX *context, const unsigned char data[64])
 
 #undef SZ_MD5_F_DEAL
 
-#define SZ_MD5_F_DEAL(x,y,z) (y ^ (x | ~z))
+#define SZ_MD5_F_DEAL(x, y, z) (y ^ (x | ~z))
 
     SZ_MD5_P_DEAL(A, B, C, D, 0, 6, 0xF4292244);
     SZ_MD5_P_DEAL(D, A, B, C, 7, 10, 0x432AFF97);
@@ -219,15 +213,13 @@ void SZ_MD5::md5update(MD5_CTX *ctx, unsigned char *input, size_t ilen)
     }
 }
 
-
 void SZ_MD5::md5final(unsigned char output[16], MD5_CTX *ctx)
 {
     unsigned long last, padn;
     unsigned long high, low;
     unsigned char msglen[8];
 
-    high = (ctx->count[0] >> 29)
-        | (ctx->count[1] << 3);
+    high = (ctx->count[0] >> 29) | (ctx->count[1] << 3);
     low = (ctx->count[0] << 3);
 
     SZ_MD5_PUT_ULONG_LE(low, msglen, 0);
@@ -260,10 +252,7 @@ void SZ_MD5::decode(uint32_t *output, unsigned char *input, size_t length)
 {
     for (size_t i = 0, j = 0; j < length; i++, j += 4)
     {
-        output[i] = ((uint32_t)input[j])
-            | (((uint32_t)input[j + 1]) << 8)
-            | (((uint32_t)input[j + 2]) << 16)
-            | (((uint32_t)input[j + 3]) << 24);
+        output[i] = ((uint32_t)input[j]) | (((uint32_t)input[j + 1]) << 8) | (((uint32_t)input[j + 2]) << 16) | (((uint32_t)input[j + 3]) << 24);
     }
 }
 
@@ -331,5 +320,3 @@ std::string SZ_MD5::binstr(const void *buf, size_t length, const std::string &sp
 
     return sOut;
 }
-
-} // namespace SZ

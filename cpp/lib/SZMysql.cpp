@@ -1,7 +1,6 @@
 #include "SZMysql.h"
 
-namespace SZ
-{
+#if defined SZ_USE_MYSQL
 
 static std::string mysqlError(MYSQL *mysqlHandle)
 {
@@ -15,13 +14,13 @@ static std::string mysqlError(MYSQL *mysqlHandle)
 void SZ_DBConfig::loadConfig(const std::map<std::string, std::string> &mapConfig)
 {
     auto mConf = mapConfig;
-    host               = mConf["host"];
-    username           = mConf["username"];
-    password           = mConf["password"];
-    database           = mConf["database"];
-    charset            = mConf["charset"];
+    host = mConf["host"];
+    username = mConf["username"];
+    password = mConf["password"];
+    database = mConf["database"];
+    charset = mConf["charset"];
 
-    if(!mConf["port"].empty())
+    if (!mConf["port"].empty())
     {
         port = SZ_Common::stringTo<int>(mConf["port"]);
     }
@@ -29,11 +28,11 @@ void SZ_DBConfig::loadConfig(const std::map<std::string, std::string> &mapConfig
     {
         clientFlag = SZ_Common::stringTo<int>(mConf["client_flag"]);
     }
-    if(!mConf["connect_timeout"].empty())
+    if (!mConf["connect_timeout"].empty())
     {
         connectTimeout = SZ_Common::stringTo<int>(mConf["connect_timeout"]);
     }
-    if(!mConf["read_timeout"].empty())
+    if (!mConf["read_timeout"].empty())
     {
         readTimeout = SZ_Common::stringTo<int>(mConf["read_timeout"]);
     }
@@ -105,8 +104,8 @@ SZ_Mysql::~SZ_Mysql()
     }
 }
 
-void SZ_Mysql::initialize(const std::string& sHost, int iPort, const std::string& sUsername, const std::string& sPassword,
-                          const std::string& sDatabase, const std::string &sCharset, int iClientFlag)
+void SZ_Mysql::initialize(const std::string &sHost, int iPort, const std::string &sUsername, const std::string &sPassword,
+                          const std::string &sDatabase, const std::string &sCharset, int iClientFlag)
 {
     config_.host = sHost;
     config_.username = sUsername;
@@ -126,7 +125,7 @@ void SZ_Mysql::connect()
 {
     disconnect();
 
-    if(nullptr == handle_)
+    if (nullptr == handle_)
     {
         handle_ = mysql_init(nullptr);
         if (nullptr == handle_)
@@ -135,8 +134,8 @@ void SZ_Mysql::connect()
         }
     }
 
-    //建立连接后, 自动调用设置字符集语句
-    if(!config_.charset.empty())
+    // 建立连接后, 自动调用设置字符集语句
+    if (!config_.charset.empty())
     {
         if (mysql_options(handle_, MYSQL_SET_CHARSET_NAME, config_.charset.c_str()))
         {
@@ -144,9 +143,8 @@ void SZ_Mysql::connect()
         }
     }
 
-
-    //设置连接超时
-    if(config_.connectTimeout > 0)
+    // 设置连接超时
+    if (config_.connectTimeout > 0)
     {
         if (mysql_options(handle_, MYSQL_OPT_CONNECT_TIMEOUT, &config_.connectTimeout))
         {
@@ -154,8 +152,7 @@ void SZ_Mysql::connect()
         }
     }
 
-
-    //设置读超时
+    // 设置读超时
     if (config_.readTimeout > 0)
     {
         if (mysql_options(handle_, MYSQL_OPT_READ_TIMEOUT, &config_.readTimeout))
@@ -164,7 +161,7 @@ void SZ_Mysql::connect()
         }
     }
 
-    //设置写超时
+    // 设置写超时
     if (config_.writeTimeout > 0)
     {
         if (mysql_options(handle_, MYSQL_OPT_WRITE_TIMEOUT, &config_.writeTimeout))
@@ -172,7 +169,6 @@ void SZ_Mysql::connect()
             throw SZ_Mysql_Exception("mysql_options MYSQL_OPT_WRITE_TIMEOUT: [" + SZ_Common::toString(config_.writeTimeout) + "] [" + mysqlError(handle_) + "]");
         }
     }
-
 
     if (mysql_real_connect(handle_, config_.host.c_str(), config_.username.c_str(), config_.password.c_str(),
                            config_.database.c_str(), config_.port, nullptr, config_.clientFlag) == nullptr)
@@ -330,5 +326,4 @@ std::string SZ_Mysql::escapeString(const std::string &sFrom)
     return sTo;
 }
 
-} // namespace SZ
-
+#endif // SZ_USE_MYSQL

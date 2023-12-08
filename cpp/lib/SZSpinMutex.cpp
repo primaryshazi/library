@@ -1,13 +1,11 @@
 #include "SZSpinMutex.h"
 
 #include <thread>
-
-namespace SZ
-{
+#include <chrono>
 
 SZ_SpinMutex::SZ_SpinMutex()
 {
-    flag_.clear(std::memory_order_release);
+    flag_.clear();
 }
 
 SZ_SpinMutex::~SZ_SpinMutex()
@@ -17,7 +15,7 @@ SZ_SpinMutex::~SZ_SpinMutex()
 void SZ_SpinMutex::lock()
 {
     size_t i = 1;
-    while (flag_.test_and_set(std::memory_order_acquire))
+    while (flag_.test_and_set())
     {
         if (i % 10 == 0)
         {
@@ -34,7 +32,7 @@ void SZ_SpinMutex::lock()
 bool SZ_SpinMutex::try_lock()
 {
     int times = 10;
-    for (;times > 0 && flag_.test_and_set(std::memory_order_acquire); --times)
+    for (; times > 0 && flag_.test_and_set(); --times)
     {
         std::this_thread::yield();
     }
@@ -44,7 +42,5 @@ bool SZ_SpinMutex::try_lock()
 
 void SZ_SpinMutex::unlock()
 {
-    flag_.clear(std::memory_order_release);
+    flag_.clear();
 }
-
-} // namespace sZ

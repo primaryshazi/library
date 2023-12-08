@@ -1,18 +1,15 @@
-#ifndef SZLIBRARY_SZMD5_H
-#define SZLIBRARY_SZMD5_H
+#pragma once
 
-#include "SZException.h"
 #include "SZCommon.h"
+#include "SZUtility.h"
 
 #include <fstream>
 #include <cstring>
-
-namespace SZ
-{
+#include <vector>
 
 struct SZ_MD5_Exception : public SZ_Exception
 {
-    SZ_MD5_Exception(const std::string &sErr) : SZ_Exception("SZMD5", sErr) {}
+    SZ_MD5_Exception(const std::string &sErr) : SZ_Exception(__FUNCTION__, sErr) {}
     virtual ~SZ_MD5_Exception() noexcept {}
 };
 
@@ -149,7 +146,3 @@ protected:
 
     static unsigned char PADDING_[64];
 };
-
-} // namespace SZ
-
-#endif // SZLIBRARY_SZMD5_H

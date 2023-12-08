@@ -1,5 +1,4 @@
-#ifndef SZLIBRARY_SZCOMMON_H
-#define SZLIBRARY_SZCOMMON_H
+#pragma once
 
 #include <algorithm>
 #include <array>
@@ -11,442 +10,590 @@
 #include <unordered_set>
 #include <map>
 #include <unordered_map>
-#include <thread>
 #include <sstream>
 #include <string>
 #include <cctype>
-#include <cmath>
-#include <cstring>
 #include <cerrno>
-#include <unistd.h>
-#include <ctime>
-#include <sys/time.h>
-#include <linux/limits.h>
+#include <cstring>
+#include <chrono>
+#include <memory>
+#include <cstdint>
 #include <sys/types.h>
+#include <ctime>
+#include <sys/timeb.h>
+#include <cstring>
+#include <thread>
+#include <cmath>
 
+#if defined WIN32 || defined _WIN32 || defined _WIN64
+#define SZ_TARGET_PLATFORM_WINDOWS 1
+#elif __APPLE__
+#define SZ_TARGET_PLATFORM_IOS 1
+
+#elif defined ANDROID
+#define SZ_TARGET_PLATFORM_ANDROID 1
+#define SZ_TARGET_PLATFORM_LINUX 1
+#elif __linux__
+#define SZ_TARGET_PLATFORM_LINUX 1
+#else
+#error Unsupported platform.
+#endif
+
+#if defined SZ_TARGET_PLATFORM_WINDOWS
+#include <windows.h>
+#else
+#include <sys/time.h>
+#include <unistd.h>
+#endif
+
+#if defined SZ_TARGET_PLATFORM_WINDOWS
+#define SZ_FILE_NAME(x) (strrchr(x, '\\') ? strrchr(x, '\\') + 1 : x)
+#else
 #define SZ_FILE_NAME(x) (strrchr(x, '/') ? strrchr(x, '/') + 1 : x)
+#endif
 #define SZ_FILE_FUNC_LINE "[" << SZ_FILE_NAME(__FILE__) << "::" << __FUNCTION__ << "::" << __LINE__ << "]"
 
-namespace SZ
+#define NormalPropertyBuilder(access_permission, type, name, value) \
+	access_permission:                                              \
+	type m_##name{value};                                           \
+                                                                    \
+public:                                                             \
+	inline void set_##name(type value_##name)                       \
+	{                                                               \
+		m_##name = value_##name;                                    \
+	}                                                               \
+	inline type get_##name() const                                  \
+	{                                                               \
+		return m_##name;                                            \
+	}
+
+#define PointerPropertyBuilder(access_permission, type, name, value) \
+	access_permission:                                               \
+	type *m_##name{value};                                           \
+                                                                     \
+public:                                                              \
+	inline void set_##name(type *const &value_##name)                \
+	{                                                                \
+		m_##name = value_##name;                                     \
+	}                                                                \
+	inline type *get_##name()                                        \
+	{                                                                \
+		return m_##name;                                             \
+	}
+
+#define ReferencePropertyBuilder(access_permission, type, name, value) \
+	access_permission:                                                 \
+	type m_##name{value};                                              \
+                                                                       \
+public:                                                                \
+	inline void set_##name(const type &value_##name)                   \
+	{                                                                  \
+		m_##name = value_##name;                                       \
+	}                                                                  \
+	inline const type &get_##name() const                              \
+	{                                                                  \
+		return m_##name;                                               \
+	}
+
+#define NormalPropertyBuilderRead(access_permission, type, name, value) \
+	access_permission:                                                  \
+	type m_##name{value};                                               \
+                                                                        \
+public:                                                                 \
+	inline type get_##name() const                                      \
+	{                                                                   \
+		return m_##name;                                                \
+	}
+
+#define PointerPropertyBuilderRead(access_permission, type, name, value) \
+	access_permission:                                                   \
+	type *m_##name{value};                                               \
+                                                                         \
+public:                                                                  \
+	inline type *get_##name()                                            \
+	{                                                                    \
+		return m_##name;                                                 \
+	}
+
+#define ReferencePropertyBuilderRead(access_permission, type, name, value) \
+	access_permission:                                                     \
+	type m_##name{value};                                                  \
+                                                                           \
+public:                                                                    \
+	inline const type &get_##name() const                                  \
+	{                                                                      \
+		return m_##name;                                                   \
+	}
+
+namespace SZ_Common
 {
+	const float EPSILON_FLOAT = 1.0E-6F;
+	const double EPSILON_DOUBLE = 1.0E-6F;
+	const long double EPSILON_LONG_DOUBLE = 1.0E-10F;
 
-class SZ_Common
-{
-public:
-    static const float EPSILON_FLOAT;                   // float精度，默认6位
-    static const double EPSILON_DOUBLE;                 // double精度，默认6位
-    static const long double EPSILON_LONG_DOUBLE;       // long double精度，默认10位
+	constexpr time_t SECOND_AT_ONE_MINUTE = 60;
+	constexpr time_t MINUTE_AT_ONE_HOUR = 60;
+	constexpr time_t HOUR_AT_ONE_DAY = 24;
+	constexpr time_t SECOND_AT_ONE_HOUR = SECOND_AT_ONE_MINUTE * MINUTE_AT_ONE_HOUR;
+	constexpr time_t MINUTE_AT_ONE_DAY = MINUTE_AT_ONE_HOUR * HOUR_AT_ONE_DAY;
+	constexpr time_t SECOND_AT_ONE_DAY = SECOND_AT_ONE_MINUTE * MINUTE_AT_ONE_HOUR * HOUR_AT_ONE_DAY;
 
-    static const time_t SECOND_AT_ONE_DAY;              // 一天秒数
-    static const time_t SECOND_AT_ONE_HOUR;             // 一时秒数
-    static const time_t SECOND_AT_ONE_MINUTE;           // 一分秒数
-    static const time_t HOUR_AT_ONE_DAY;                // 一天时数
-    static const time_t MINUTE_AT_ONE_DAY;              // 一天分数
-    static const time_t MINUTE_AT_ONE_HOUR;             // 一时分数
+	constexpr int64_t TEN_MULTIPLE = 10;
+	constexpr int64_t HUNDRED_MULTIPLE = 100;
+	constexpr int64_t THOUSAND_MULTIPLE = 1000;
+	constexpr int64_t MYRIAD_MULTIPLE = 10000;
+	constexpr int64_t MILLION_MULTIPLE = THOUSAND_MULTIPLE * THOUSAND_MULTIPLE;
+	constexpr int64_t BILLION_MULTIPLE = MILLION_MULTIPLE * THOUSAND_MULTIPLE;
+	constexpr int64_t TRILLION_MULTIPLE = BILLION_MULTIPLE * THOUSAND_MULTIPLE;
+	constexpr int64_t QUADRILLION_MULTIPLE = TRILLION_MULTIPLE * THOUSAND_MULTIPLE;
 
-    static const int64_t TEN_MULTIPLE;                  // 十倍
-    static const int64_t HUNDRED_MULTIPLE;              // 百倍
-    static const int64_t THOUSAND_MULTIPLE;             // 千倍
-    static const int64_t MYRIAD_MULTIPLE;               // 万倍
-    static const int64_t MILLION_MULTIPLE;              // 百万倍
-    static const int64_t BILLION_MULTIPLE;              // 十亿倍
+	constexpr int64_t KB = 1024;
+	constexpr int64_t MB = KB * KB;
+	constexpr int64_t GB = MB * KB;
+	constexpr int64_t TB = GB * KB;
+	constexpr int64_t PB = TB * KB;
 
-    static const int64_t PER_K;                         // 1K
-    static const int64_t PER_M;                         // 1M
-    static const int64_t PER_G;                         // 1G
+	/**
+	 * @brief
+	 *
+	 * @param clock
+	 * @param result
+	 */
+	void localtime_r(const time_t *clock, struct tm *result);
 
-    class SZ_TimezoneHelper
-    {
-    public:
-        SZ_TimezoneHelper();
+	/**
+	 * @brief
+	 *
+	 * @param clock
+	 * @param result
+	 */
+	void gmtime_r(const time_t *clock, struct tm *result);
 
-        static std::string timezone_local;
-        static int64_t timezone_diff_secs;
-    };
+	/**
+	 * @brief
+	 *
+	 * @param clock
+	 * @param result
+	 */
+	time_t timegm(struct tm *timeptr);
 
-    static SZ_TimezoneHelper _TimeZoneHelper;
+	/**
+	 * @brief
+	 *
+	 * @param tv
+	 * @return int
+	 */
+	int gettimeofday(struct timeval &tv);
 
-    /**
-     * @brief 时间转换为时间结构体
-     *
-     * @param tt
-     * @param stm
-     */
-    static void time2tm(const time_t &tt, struct tm &stm);
+	/**
+	 * @brief time_t -> tm
+	 *
+	 * @param tt
+	 * @param stm
+	 */
+	void time2tmUTC(const time_t &tt, struct tm &stm);
 
-    /**
-     * @brief 时间结构体体转时间
-     *
-     * @param stm
-     * @param tt
-     */
-    static void tm2time(struct tm &stm, time_t &tt);
+	/**
+	 * @brief tm -> time_t
+	 *
+	 * @param stm
+	 * @param tt
+	 */
+	void tm2timeUTC(struct tm &stm, time_t &tt);
 
-    /**
-     * @brief 字符串转换为时间结构体
-     *
-     * @param sString
-     * @param sFormat
-     * @param stm
-     * @return int
-     */
-    static int str2tm(const std::string &sString, const std::string &sFormat, struct tm &stm);
+	/**
+	 * @brief time_t -> string
+	 *
+	 * @param t
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string time2strUTC(const time_t &tt, const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 字符串转换为时间
-     *
-     * @param sString
-     * @param sFormat
-     * @return time_t
-     */
-    static time_t str2time(const std::string &sString, const std::string &sFormat = "%Y%m%d%H%M%S");
+	/**
+	 * @brief tm -> string
+	 *
+	 * @param stm
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string tm2strUTC(const struct tm &stm, const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 时间转为字符串
-     *
-     * @param tt
-     * @param sFormat
-     * @return std::string
-     */
-    static std::string time2str(const time_t &tt, const std::string &sFormat = "%Y%m%d%H%M%S");
+	/**
+	 * @brief time -> string
+	 *
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string now2strUTC(const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 时间结构体转换为字符串
-     *
-     * @param stm
-     * @param sFormat
-     * @return std::string
-     */
-    static std::string tm2str(const struct tm &stm, const std::string &sFormat = "%Y%m%d%H%M%S");
+	/**
+	 * @brief string -> time_t
+	 * @param sString
+	 * @param sFormat
+	 * @return time_t
+	 */
+	time_t str2timeUTC(const std::string &sString, const std::string &sFormat);
 
-    /**
-     * @brief 当前秒时间字符串
-     *
-     * @param sFormat
-     * @return std::string
-     */
-    static std::string now2str(const std::string &sFormat = "%Y%m%d%H%M%S");
+	/**
+	 * @brief string -> time_t
+	 * @param sString
+	 * @param sFormat
+	 * @param stm
+	 * @return time_t
+	 */
+	int str2tmUTC(const std::string &sString, const std::string &sFormat, struct tm &stm);
 
-    /**
-     * @brief 当前毫秒时间字符串
-     *
-     * @return std::string
-     */
-    static std::string now2msstr();
+	/**
+	 * @brief time_t -> tm
+	 *
+	 * @param tt
+	 * @param stm
+	 */
+	void time2tm(const time_t &tt, struct tm &stm);
 
-    /**
-     * @brief 当前日期时间串
-     *
-     * @return std::string
-     */
-    static std::string nowdate2str();
+	/**
+	 * @brief tm -> time_t
+	 *
+	 * @param stm
+	 * @param tt
+	 */
+	void tm2time(struct tm &stm, time_t &tt);
 
-    /**
-     * @brief 当前时间串
-     *
-     * @return std::string
-     */
-    static std::string nowtime2str();
+	/**
+	 * @brief time_t -> string
+	 *
+	 * @param t
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string time2str(const time_t &tt, const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 获取当前毫秒数
-     *
-     * @return int64_t
-     */
-    static int64_t nowms();
+	/**
+	 * @brief tm -> string
+	 *
+	 * @param stm
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string tm2str(const struct tm &stm, const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 获取当前微妙数
-     *
-     * @return int64_t
-     */
-    static int64_t nowus();
+	/**
+	 * @brief time -> string
+	 *
+	 * @param sFormat
+	 * @return std::string
+	 */
+	std::string now2str(const std::string &sFormat = "%Y%m%d%H%M%S");
 
-    /**
-     * @brief 获取下一天日期
-     *
-     * @param sDate %Y%m%d
-     * @return std::string
-     */
-    static std::string nextDate(const std::string &sDate);
+	/**
+	 * @brief string -> time_t
+	 * @param sString
+	 * @param sFormat
+	 * @return time_t
+	 */
+	time_t str2time(const std::string &sString, const std::string &sFormat);
 
-    /**
-     * @brief 获取上一天日期
-     *
-     * @param sDate %Y%m%d
-     * @return std::string
-     */
-    static std::string prevDate(const std::string &sDate);
+	/**
+	 * @brief string -> time_t
+	 * @param sString
+	 * @param sFormat
+	 * @param stm
+	 * @return time_t
+	 */
+	int str2tm(const std::string &sString, const std::string &sFormat, struct tm &stm);
 
-    /**
-     * @brief 获取上一天日期
-     *
-     * @param iDate %Y%m%d
-     * @return int
-     */
-    static int nextDate(int iDate);
+	/**
+	 * @brief
+	 *
+	 * @return int64_t
+	 */
+	int64_t nows();
 
-    /**
-     * @brief 获取下一天日期
-     *
-     * @param iDate %Y%m%d
-     * @return int
-     */
-    static int prevDate(int iDate);
+	/**
+	 * @brief
+	 *
+	 * @return int64_t
+	 */
+	int64_t nowms();
 
-    /**
-     * @brief 获取下一月份
-     *
-     * @param sMonth %Y%m%d
-     * @return std::string
-     */
-    static std::string nextMonth(const std::string &sMonth);
+	/**
+	 * @brief
+	 *
+	 * @return int64_t
+	 */
+	int64_t nowus();
 
-    /**
-     * @brief 获取上一月份
-     *
-     * @param sDate %Y%m%d
-     * @return std::string
-     */
-    static std::string prevMonth(const std::string &sMonth);
+	/**
+	 * @brief
+	 *
+	 * @return int64_t
+	 */
+	int nowDate();
 
-    /**
-     * @brief 获取下一年份
-     *
-     * @param sYear
-     * @return std::string
-     */
-    static std::string nextYear(const std::string &sYear);
+	/**
+	 * @brief
+	 *
+	 * @return int64_t
+	 */
+	int64_t nowTime();
 
-    /**
-     * @brief 获取上一年份
-     *
-     * @param sYear
-     * @return std::string
-     */
-    static std::string prevYear(const std::string &sYear);
+	/**
+	 * @brief:
+	 *
+	 * @return: int
+	 * @param:  iDate
+	 * @param:  offset
+	 */
+	int nextDate(int iDate, int offset = 1);
 
-    /**
-     * @brief 睡眠秒数
-     *
-     * @param sec
-     */
-    static void sleep(uint32_t sec);
+	/**
+	 * @brief:
+	 *
+	 * @return: int
+	 * @param:  iDate
+	 * @param:  offset
+	 */
+	int prevDate(int iDate, int offset = 1);
 
-    /**
-     * @brief 睡眠毫秒
-     *
-     * @param ms
-     */
-    static void msleep(uint32_t ms);
+	/**
+	 * @brief:
+	 *
+	 * @param:  sec
+	 */
+	void sleep(uint32_t sec);
 
-    /**
-     * @brief 比较浮点数是否相等
-     *
-     * @param x
-     * @param y
-     * @param epsilon
-     * @return bool
-     */
-    static bool equal(float x, float y, float epsilon = EPSILON_FLOAT);
+	/**
+	 * @brief:
+	 *
+	 * @param:
+	 */
+	void mssleep(uint32_t mssec);
 
-    static bool equal(double x, double y, double epsilon = EPSILON_DOUBLE);
+	/**
+	 * @brief
+	 */
+	int rand(uint32_t &seed);
 
-    static bool equal(long double x, long double y, long double epsilon = EPSILON_LONG_DOUBLE);
+	/**
+	 * @brief
+	 */
+	int rand();
 
-    /**
-     * @brief 依据线程ID生成随机数
-     *
-     * @return uint32_t
-     */
-    static int rand_thread();
+	/**
+	 * @brief 比较浮点数是否相等
+	 *
+	 * @param x
+	 * @param y
+	 * @param epsilon
+	 * @return bool
+	 */
+	bool equal(float x, float y, float epsilon = EPSILON_FLOAT);
+	bool equal(double x, double y, double epsilon = EPSILON_DOUBLE);
+	bool equal(long double x, long double y, long double epsilon = EPSILON_LONG_DOUBLE);
 
-    /**
-     * @brief 从source左端中移除target中存在的字符
-     *
-     * @param source
-     * @param str
-     * @param isEntire true：删除target字符串；false：删除target每个字符
-     * @return std::string
-     */
-    static std::string left_trim(const std::string &source, const std::string &target = " \r\n\t", bool isEntire = false);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @param str
+	 * @return std::string
+	 */
+	std::string ltrim(const std::string &source, const std::string &target = " \r\n\t\v\f");
 
-    /**
-     * @brief 从source右端中移除target中存在的字符
-     *
-     * @param source
-     * @param str
-     * @param isEntire true：删除target字符串；false：删除target每个字符
-     * @return std::string
-     */
-    static std::string right_trim(const std::string &source, const std::string &target = " \r\n\t", bool isEntire = false);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @param str
+	 * @return std::string
+	 */
+	std::string rtrim(const std::string &source, const std::string &target = " \r\n\t\v\f");
 
-    /**
-     * @brief 从source两端中移除target中存在的字符
-     *
-     * @param source
-     * @param str
-     * @param isEntire true：删除target字符串；false：删除target每个字符
-     * @return std::string
-     */
-    static std::string trim(const std::string &source, const std::string &target = " \r\n\t", bool isEntire = false);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @param str
+	 * @return std::string
+	 */
+	std::string trim(const std::string &source, const std::string &target = " \r\n\t\v\f");
 
-    /**
-     * @brief 字符串转换为小写
-     *
-     * @param source
-     * @return std::string
-     */
-    static std::string toLower(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return std::string
+	 */
+	std::string ltrimSpace(const std::string &source);
 
-    /**
-     * @brief 字符串转换为大写
-     *
-     * @param source
-     * @return std::string
-     */
-    static std::string toUpper(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return std::string
+	 */
+	std::string rtrimSpace(const std::string &source);
 
-    /**
-     * @brief 字符串是否全为十进制数字
-     *
-     * @param source
-     * @return bool
-     */
-    static bool isDigit(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return std::string
+	 */
+	std::string trimSpace(const std::string &source);
 
-    /**
-     * @brief 字符串是否全为十六进制数字
-     *
-     * @param source
-     * @return bool
-     */
-    static bool isXDigit(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return std::string
+	 */
+	std::string toLower(const std::string &source);
 
-    /**
-     * @brief 判断字符串是否全为字母
-     *
-     * @param source
-     * @return bool
-     */
-    static bool isAlpha(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return std::string
+	 */
+	std::string toUpper(const std::string &source);
 
-    /**
-     * @brief 判断字符串是否全为字母或数字
-     *
-     * @param source
-     * @return bool
-     */
-    static bool isAlnum(const std::string &source);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return bool
+	 */
+	bool isDigit(const std::string &source);
 
-    /**
-     * @brief 分割字符串
-     *
-     * @param str
-     * @param split
-     * @param withEmpty
-     * @return std::string
-     */
-    static std::vector<std::string> splitString(const std::string &str, const std::string &split, bool withEmpty = false);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return bool
+	 */
+	bool isXDigit(const std::string &source);
 
-    /**
-     * @brief 替换字符串
-     *
-     * @param str
-     * @param src
-     * @param dest
-     * @return std::string
-     */
-    static std::string replaceString(const std::string &str, const std::string &src, const std::string &dest);
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return bool
+	 */
+	bool isAlpha(const std::string &source);
 
-    /**
-     * @brief 返回系统错误
-     *
-     * @return std::string
-     */
-    static std::string error();
+	/**
+	 * @brief
+	 *
+	 * @param source
+	 * @return bool
+	 */
+	bool isAlnum(const std::string &source);
 
-    /**
-     * @brief 返回执行程序的路径
-     *
-     * @return std::string
-     */
-    static std::string selfPath();
+	/**
+	 * @brief
+	 *
+	 * @param str
+	 * @param split
+	 * @param withEmpty
+	 * @return std::string
+	 */
+	std::vector<std::string> splitString(const std::string &str, const std::string &split, bool withEmpty = false);
 
-    /**
-     * @brief 转换字符串
-     *
-     * @tparam T
-     * @param val
-     * @return std::string
-     */
-    template <typename T>
-    static std::string toString(const T &val);
+	/**
+	 * @brief
+	 *
+	 * @param vstr
+	 * @param join
+	 * @param withEmpty
+	 * @return std::string
+	 */
+	std::string joinString(const std::vector<std::string> &vstr, const std::string &join, bool withEmpty = false);
 
-    template <typename X, typename Y>
-    static std::string toString(const std::pair<X, Y> &p);
+	/**
+	 * @brief
+	 *
+	 * @param str
+	 * @param src
+	 * @param dest
+	 * @return std::string
+	 */
+	std::string replaceString(const std::string &str, const std::string &src, const std::string &dest);
 
-    template <typename Iter>
-    static std::string toString(const Iter &beg, const Iter &end);
+	/**
+	 * @brief
+	 *
+	 * @tparam T
+	 * @param val
+	 * @return std::string
+	 */
+	template <typename T>
+	std::string toString(const T &val);
 
-    template <typename T, size_t U>
-    static std::string toString(const std::array<T, U> &a);
+	template <typename X, typename Y>
+	std::string toString(const std::pair<X, Y> &p);
 
-    template <typename T>
-    static std::string toString(const std::initializer_list<T> &l);
+	template <typename Iter>
+	std::string toString(const Iter &beg, const Iter &end);
 
-    template <typename T>
-    static std::string toString(const std::vector<T> &v);
+	template <typename T, size_t U>
+	std::string toString(const std::array<T, U> &a);
 
-    template <typename T>
-    static std::string toString(const std::list<T> &l);
+	template <typename T>
+	std::string toString(const std::initializer_list<T> &l);
 
-    template <typename T>
-    static std::string toString(const std::deque<T> &d);
+	template <typename T>
+	std::string toString(const std::vector<T> &v);
 
-    template <typename T>
-    static std::string toString(const std::set<T> &s);
+	template <typename T>
+	std::string toString(const std::list<T> &l);
 
-    template <typename T>
-    static std::string toString(const std::unordered_set<T> &s);
+	template <typename T>
+	std::string toString(const std::deque<T> &d);
 
-    template <typename K, typename V>
-    static std::string toString(const std::map<K, V> &m);
+	template <typename T>
+	std::string toString(const std::set<T> &s);
 
-    template <typename K, typename V>
-    static std::string toString(const std::unordered_map<K, V> &m);
+	template <typename T>
+	std::string toString(const std::unordered_set<T> &s);
 
-    /**
-     * @brief 字符串转换
-     *
-     * @tparam T
-     * @param str
-     * @return T
-     */
-    template <typename T>
-    static T stringTo(const std::string &str);
+	template <typename K, typename V>
+	std::string toString(const std::map<K, V> &m);
 
-private:
-    /**
-     * @brief 转换字符串
-     *
-     * @tparam Container
-     * @param con
-     * @param str
-     */
-    template <typename Container>
-    static void toString(const Container &con, std::string &str);
+	template <typename K, typename V>
+	std::string toString(const std::unordered_map<K, V> &m);
 
-    /**
-     * @brief 转换字符串
-     *
-     * @tparam Iter
-     * @param beg
-     * @param end
-     * @param str
-     */
-    template <typename Iter>
-    static void toString(const Iter &beg, const Iter &end, std::string &str);
+	/**
+	 * @brief
+	 *
+	 * @tparam T
+	 * @param str
+	 * @return T
+	 */
+	template <typename T>
+	T stringTo(const std::string &str);
+
+	/**
+	 * @brief
+	 *
+	 * @tparam Container
+	 * @param con
+	 * @param str
+	 */
+	template <typename Container>
+	void toString(const Container &con, std::string &str);
+
+	/**
+	 * @brief
+	 *
+	 * @tparam Iter
+	 * @param beg
+	 * @param end
+	 * @param str
+	 */
+	template <typename Iter>
+	void toString(const Iter &beg, const Iter &end, std::string &str);
 };
 
 template <>
@@ -488,312 +635,308 @@ std::string SZ_Common::toString(const std::string &val);
 template <typename T>
 std::string SZ_Common::toString(const T &val)
 {
-    std::ostringstream ss;
-    ss << val;
-    return ss.str();
+	std::ostringstream ss;
+	ss << val;
+	return ss.str();
 }
 
 template <typename X, typename Y>
 std::string SZ_Common::toString(const std::pair<X, Y> &p)
 {
-    std::string str;
+	std::string str;
 
-    str += "[";
-    str += SZ_Common::toString(p.first);
-    str += "]=[";
-    str += SZ_Common::toString(p.second);
-    str += "]";
+	str += "[";
+	str += SZ_Common::toString(p.first);
+	str += "]=[";
+	str += SZ_Common::toString(p.second);
+	str += "]";
 
-    return str;
+	return str;
 }
 
 template <typename Iter>
 std::string SZ_Common::toString(const Iter &beg, const Iter &end)
 {
-    std::string str;
-    SZ_Common::toString(beg, end, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(beg, end, str);
+	return str;
 }
 
 template <typename T, size_t U>
 std::string SZ_Common::toString(const std::array<T, U> &a)
 {
-    std::string str;
-    SZ_Common::toString(a, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(a, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::initializer_list<T> &l)
 {
-    std::string str;
-    SZ_Common::toString(l, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(l, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::vector<T> &v)
 {
-    std::string str;
-    SZ_Common::toString(v, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(v, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::list<T> &l)
 {
-    std::string str;
-    SZ_Common::toString(l, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(l, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::deque<T> &d)
 {
-    std::string str;
-    SZ_Common::toString(d, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(d, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::set<T> &s)
 {
-    std::string str;
-    SZ_Common::toString(s, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(s, str);
+	return str;
 }
 
 template <typename T>
 std::string SZ_Common::toString(const std::unordered_set<T> &s)
 {
-    std::string str;
-    SZ_Common::toString(s, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(s, str);
+	return str;
 }
 
 template <typename K, typename V>
 std::string SZ_Common::toString(const std::map<K, V> &m)
 {
-    std::string str;
-    SZ_Common::toString(m, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(m, str);
+	return str;
 }
 
 template <typename K, typename V>
 std::string SZ_Common::toString(const std::unordered_map<K, V> &m)
 {
-    std::string str;
-    SZ_Common::toString(m, str);
-    return str;
+	std::string str;
+	SZ_Common::toString(m, str);
+	return str;
 }
 
 template <typename Container>
 void SZ_Common::toString(const Container &con, std::string &str)
 {
-    bool isFirst = true;
-    for (auto &element : con)
-    {
-        if (isFirst)
-        {
-            isFirst = false;
-        }
-        else
-        {
-            str += " ";
-        }
-        str += SZ_Common::toString(element);
-    }
+	bool isFirst = true;
+	for (auto &element : con)
+	{
+		if (isFirst)
+		{
+			isFirst = false;
+		}
+		else
+		{
+			str += " ";
+		}
+		str += SZ_Common::toString(element);
+	}
 }
 
 template <typename Iter>
 void SZ_Common::toString(const Iter &beg, const Iter &end, std::string &str)
 {
-    for (auto it = beg; it != end; ++it)
-    {
-        if (it != beg)
-        {
-            str += " ";
-        }
-        str += SZ_Common::toString(*it);
-    }
+	for (auto it = beg; it != end; ++it)
+	{
+		if (it != beg)
+		{
+			str += " ";
+		}
+		str += SZ_Common::toString(*it);
+	}
 }
 
 namespace CM
 {
 
-template<typename T>
-struct stringToX
-{
-    T operator()(const std::string &str)
-    {
-        std::string s = "0";
-        if(!str.empty())
-        {
-            s = str;
-        }
+	template <typename T>
+	struct stringToX
+	{
+		T operator()(const std::string &str)
+		{
+			std::string s = "0";
+			if (!str.empty())
+			{
+				s = str;
+			}
 
-        std::istringstream ss(s);
-        T val;
-        ss >> val;
+			std::istringstream ss(s);
+			T val;
+			ss >> val;
 
-        return val;
-    }
-};
+			return val;
+		}
+	};
 
-template <>
-struct stringToX<int>
-{
-    int operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return static_cast<int>(std::strtol(str.c_str(), nullptr, radix));
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<int>
+	{
+		int operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return static_cast<int>(std::strtol(str.c_str(), nullptr, radix));
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<unsigned>
-{
-    unsigned operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return static_cast<unsigned>(std::strtoul(str.c_str(), nullptr, radix));
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<unsigned>
+	{
+		unsigned operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return static_cast<unsigned>(std::strtoul(str.c_str(), nullptr, radix));
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<long>
-{
-    long operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return std::strtol(str.c_str(), nullptr, radix);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<long>
+	{
+		long operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return std::strtol(str.c_str(), nullptr, radix);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<unsigned long>
-{
-    unsigned long operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return std::strtoul(str.c_str(), nullptr, radix);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<unsigned long>
+	{
+		unsigned long operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return std::strtoul(str.c_str(), nullptr, radix);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<long long>
-{
-    long long operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return std::strtoll(str.c_str(), nullptr, radix);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<long long>
+	{
+		long long operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return std::strtoll(str.c_str(), nullptr, radix);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<unsigned long long>
-{
-    unsigned long long operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            int radix = (str.find("0x") == 0 ? 16 : 10);
-            return std::strtoull(str.c_str(), nullptr, radix);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<unsigned long long>
+	{
+		unsigned long long operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				int radix = (str.find("0x") == 0 ? 16 : 10);
+				return std::strtoull(str.c_str(), nullptr, radix);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<float>
-{
-    float operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            return std::strtof(str.c_str(), nullptr);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<float>
+	{
+		float operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				return std::strtof(str.c_str(), nullptr);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<double>
-{
-    double operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            return std::strtod(str.c_str(), nullptr);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<double>
+	{
+		double operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				return std::strtod(str.c_str(), nullptr);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<long double>
-{
-    long double operator()(const std::string &str)
-    {
-        if (!str.empty())
-        {
-            return std::strtold(str.c_str(), nullptr);
-        }
-        return 0;
-    }
-};
+	template <>
+	struct stringToX<long double>
+	{
+		long double operator()(const std::string &str)
+		{
+			if (!str.empty())
+			{
+				return std::strtold(str.c_str(), nullptr);
+			}
+			return 0;
+		}
+	};
 
-template <>
-struct stringToX<std::string>
-{
-    std::string operator()(const std::string &str)
-    {
-        return str;
-    }
-};
+	template <>
+	struct stringToX<std::string>
+	{
+		std::string operator()(const std::string &str)
+		{
+			return str;
+		}
+	};
 
-template<typename T>
-struct stringToY
-{
-    T operator()(const std::string &str)
-    {
-        std::istringstream ss(str);
-        T val;
-        ss >> val;
+	template <typename T>
+	struct stringToY
+	{
+		T operator()(const std::string &str)
+		{
+			std::istringstream ss(str);
+			T val;
+			ss >> val;
 
-        return val;
-    }
-};
+			return val;
+		}
+	};
 
 } // namespace CM
 
 template <typename T>
 T SZ_Common::stringTo(const std::string &str)
 {
-    using stringto_type = typename std::conditional<std::is_arithmetic<T>::value, CM::stringToX<T>, CM::stringToY<T>>::type;
-    return stringto_type()(str);
+	using stringto_type = typename std::conditional<std::is_arithmetic<T>::value, CM::stringToX<T>, CM::stringToY<T>>::type;
+	return stringto_type()(str);
 }
-
-} // namespace SZ
-
-#endif // SZLIBRARY_SZCOMMON_H
