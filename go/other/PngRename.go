@@ -81,7 +81,7 @@ func printSize(fullpath string) {
 }
 
 func main() {
-	const PIC_PATH string = `C:\Users\shazi\Pictures`
-	// renameMd5(PIC_PATH)
+	const PIC_PATH string = `png`
+	renameMd5(PIC_PATH)
 	printSize(PIC_PATH)
 }
