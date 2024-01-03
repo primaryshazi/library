@@ -40,7 +40,7 @@ class SZ_Raii
 public:
     explicit SZ_Raii(T &t) : m_t(t) { ++m_t; }
 
-    virtual ~SZ_Raii() { --m_t; }
+    ~SZ_Raii() { --m_t; }
 
 private:
     T &m_t;
