@@ -1,10 +1,10 @@
-export namespace szdatetime {
+export namespace sz {
     /**
-         * 倒计时格式化 
-         * @param ms
-         * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
-         * @returns
-         */
+     * 倒计时格式化 
+     * @param ms
+     * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @returns
+     */
     export function countdownFormat(ms: number, format: string = "%D %h:%m:%s") {
         if (format.length == 0) {
             return "";
@@ -365,4 +365,4 @@ export namespace szdatetime {
 
         return Math.floor((endZeroMs - startZeroMs) / (86400 * 1000))
     }
-}
+} // namespace sz

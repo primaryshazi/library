@@ -34,9 +34,19 @@ export namespace szdefine {
     // 1000000000000000 千万亿
     export const QUADRILLION_MULTIPLE = TRILLION_MULTIPLE * THOUSAND_MULTIPLE;
 
+    // 2^10
     export const KB = 1024;
+    // 2^20
     export const MB = KB * KB;
+    // 2^30
     export const GB = MB * KB;
+    // 2^40
     export const TB = GB * KB;
+    // 2^50
     export const PB = TB * KB;
-}
+
+    // 容器默认初始大小
+    export const DEFAULT_CAPACITY = 16;
+    // 容器默认倍增系数
+    export const DEFAULT_GROWTH_FACTOR = 1.5;
+} // namespace sz

@@ -1,6 +1,83 @@
 import { szdefine } from "./sz_define";
 
-export namespace szutils {
+export namespace szcommon {
+    // 条件比较函数 返回-1、0、1
+    export type conditonCompare<T> = (a: T, b: T) => number;
+
+    export function isValid<T>(value: T): boolean {
+        return value != undefined && value != null;
+    }
+
+    /**
+     * 小优先比较函数
+     * @param a
+     * @param b
+     * @returns 0:a等于b; -1:a小于b; 1:a大于b
+     */
+    export function lessCompare<T>(a: T, b: T): number {
+        if (a == b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * 大优先比较函数
+     * @param a
+     * @param b
+     * @returns 0:a等于b; -1:a大于b; 1:a小于b
+     */
+    export function greaterCompare<T>(a: T, b: T): number {
+        if (a == b) {
+            return 0;
+        } else if (a > b) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * 二分法搜索
+     * @param arr
+     * @param target
+     * @param compare 0:a等于b; -1:a小于b; 1:a大于b
+     * @returns -1:未找到 >0:找到
+     */
+    export function binarySearch<T>(arr: T[], target: T, compare: conditonCompare<T> = lessCompare): number {
+        let left = 0;
+        let right = arr.length - 1;
+
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+
+            let cond = compare(arr[mid], target);
+            if (0 == cond) {
+                return mid;
+            } else if (-1 == cond) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * 生成范围内的随机数 [min, max]
+     * @param min 
+     * @param max 
+     * @returns 
+     */
+    export function randRangeInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+
     /**
      * 数字转换为携带单位的字符串
      * @param num 
@@ -183,5 +260,16 @@ export namespace szutils {
         return str.replace(/\{(\d+)\}/g, (match, index) => {
             return typeof args[index] !== "undefined" ? args[index] : match;
         });
+    }
+
+    /**
+     * 洗牌打乱
+     * @param array 
+     */
+    export function shuffle<T>(array: T[]) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
     }
 } // namespace szutils
