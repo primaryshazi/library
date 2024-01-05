@@ -102,7 +102,7 @@ export namespace szheap {
 
             let cur = this.size_;
             let next = Math.floor(cur / 2);
-            while (cur > 0 && this.compare_(this.data_[next], value) == -1) {
+            while (cur > 0 && this.compare_(this.data_[next], value) == 1) {
                 this.data_[cur] = this.data_[next];
                 cur = next;
                 next = Math.floor(cur / 2);
@@ -127,11 +127,11 @@ export namespace szheap {
             this.data_[final] = undefined;
             for (cur = 0; cur * 2 < final; cur = child) {
                 child = cur * 2 + 1;
-                if (child < final && this.compare_(this.data_[child], this.data_[child + 1]) == -1) {
+                if (child < final && this.compare_(this.data_[child], this.data_[child + 1]) == 1) {
                     child++;
                 }
 
-                if (this.compare_(this.data_[child], last) == -1) {
+                if (this.compare_(this.data_[child], last) == 1) {
                     this.data_[cur] = this.data_[child];
                 } else {
                     break;
