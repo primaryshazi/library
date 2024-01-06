@@ -4,7 +4,7 @@ export namespace szcommon {
     // 条件比较函数 返回-1、0、1
     export type conditonCompare<T> = (a: T, b: T) => number;
 
-    export function isValid<T>(value: T): boolean {
+    export function isValidValue<T>(value: T): boolean {
         return value != undefined && value != null;
     }
 
@@ -17,11 +17,17 @@ export namespace szcommon {
     export function lessCompare<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
-        } else if (a < b) {
+        }
+
+        if (!isValidValue(a)) {
             return -1;
-        } else {
+        }
+
+        if (!isValidValue(b)) {
             return 1;
         }
+
+        return a < b ? -1 : 1;
     }
 
     /**
@@ -33,11 +39,17 @@ export namespace szcommon {
     export function greaterCompare<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
-        } else if (a > b) {
-            return -1;
-        } else {
+        }
+
+        if (!isValidValue(a)) {
             return 1;
         }
+
+        if (!isValidValue(b)) {
+            return -1;
+        }
+
+        return a > b ? -1 : 1;
     }
 
     /**
@@ -66,6 +78,21 @@ export namespace szcommon {
 
         return -1;
     }
+
+    /**
+     * 判断数组是否有序
+     * @param array 
+     * @param compare 
+     * @returns 
+     */
+    export function isSorted<T>(array: T[], compare: conditonCompare<T> = lessCompare): boolean {
+        for (let i = 0; i < array.length - 1; i++) {
+            if (compare(array[i], array[i + 1]) > 0) {
+                return false;
+            }
+        }
+        return true;
+    };
 
     /**
      * 生成范围内的随机数 [min, max]
