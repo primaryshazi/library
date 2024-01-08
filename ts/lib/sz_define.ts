@@ -1,4 +1,11 @@
-export namespace szdefine {
+export namespace szdef {
+    // 容器值类型
+    export type CAPACITY_VALUE_TYPE<T> = T | undefined;
+    // 容器默认初始大小
+    export const DEFAULT_CAPACITY = 16;
+    // 容器默认倍增系数
+    export const DEFAULT_GROWTH_FACTOR = 1.5;
+
     // 浮点数精度
     export const EPSILON_FLOAT = 1.0E-6;
 
@@ -44,9 +51,4 @@ export namespace szdefine {
     export const TB = GB * KB;
     // 2^50
     export const PB = TB * KB;
-
-    // 容器默认初始大小
-    export const DEFAULT_CAPACITY = 16;
-    // 容器默认倍增系数
-    export const DEFAULT_GROWTH_FACTOR = 1.5;
 } // namespace sz

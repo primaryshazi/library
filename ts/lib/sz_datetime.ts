@@ -1,4 +1,4 @@
-export namespace sz {
+export namespace szdate {
     /**
      * 倒计时格式化 
      * @param ms

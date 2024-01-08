@@ -1,18 +1,14 @@
 import { szcommon } from "./sz_common";
 import { szdef } from "./sz_define";
 
-export class SZHeap<T> {
-    // 比较函数，用于构建最大堆或者最小堆
-    private compare_: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare;
-
+export class SZStack<T> {
     // 储存元素
     private data_: Array<szdef.CAPACITY_VALUE_TYPE<T>> = [];
 
     // 元素个数
     private size_: number = 0;
 
-    public constructor(compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
-        this.compare_ = compare;
+    public constructor() {
         this.data_ = new Array<szdef.CAPACITY_VALUE_TYPE<T>>(szdef.DEFAULT_CAPACITY).fill(undefined);
         this.size_ = 0;
     }
@@ -75,19 +71,12 @@ export class SZHeap<T> {
     }
 
     /**
-     * 获取比较函数
-     */
-    public get compare(): szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> {
-        return this.compare_;
-    }
-
-    /**
-     * 获取堆顶元素
+     * 获取栈顶元素
      * @returns 
      */
     public top(): szdef.CAPACITY_VALUE_TYPE<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
-            return this.data_[0];
+            return this.data_[this.size_ - 1];
         }
 
         return undefined;
@@ -108,15 +97,6 @@ export class SZHeap<T> {
 
         this.data_[this.size_] = value;
         this.size_++;
-
-        let cur = this.size_ - 1;
-        let next = Math.floor((cur - 1) / 2);
-        while (cur > 0 && this.compare_(this.data_[cur], this.data_[next]) == -1) {
-            [this.data_[cur], this.data_[next]] = [this.data_[next], this.data_[cur]];
-
-            cur = next;
-            next = Math.floor((cur - 1) / 2);
-        }
     }
 
     /**
@@ -127,31 +107,7 @@ export class SZHeap<T> {
             return;
         }
 
-        this.data_[0] = this.data_[this.size_ - 1];
-        this.size_--;
-
-        let cur = 0;
-        while (cur < this.size_) {
-            let next = cur;
-            let left = 2 * cur + 1;
-            let right = 2 * cur + 2;
-
-            if (left < this.size_ && this.compare_(this.data_[left], this.data_[next]) == -1) {
-                next = left;
-            }
-
-            if (right < this.size_ && this.compare_(this.data_[right], this.data_[next]) == -1) {
-                next = right;
-            }
-
-            if (next != cur) {
-                [this.data_[cur], this.data_[next]] = [this.data_[next], this.data_[cur]];
-                cur = next;
-            } else {
-                break;
-            }
-        }
-
+        this.size--;
         this.data_[this.size_] = undefined;
     }
 
@@ -169,36 +125,5 @@ export class SZHeap<T> {
      */
     private expandCapacity() {
         this.data_.push(...new Array<szdef.CAPACITY_VALUE_TYPE<T>>(Math.ceil(this.data_.length * (szdef.DEFAULT_GROWTH_FACTOR - 1))).fill(undefined));
-    }
-
-    /**
-     * 构建一个堆
-     * @param array 
-     * @param compare 
-     */
-    static buildHeap<T>(array: Array<szdef.CAPACITY_VALUE_TYPE<T>>, compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
-        for (let index = array.length - 1; index >= 0; index--) {
-            let cur = index;
-            while (cur < array.length) {
-                let next = cur;
-                let left = 2 * cur + 1;
-                let right = 2 * cur + 2;
-
-                if (left < array.length && compare(array[left], array[next]) == -1) {
-                    next = left;
-                }
-
-                if (right < array.length && compare(array[right], array[next]) == -1) {
-                    next = right;
-                }
-
-                if (next != cur) {
-                    [array[cur], array[next]] = [array[next], array[cur]];
-                    cur = next;
-                } else {
-                    break;
-                }
-            }
-        }
     }
 }

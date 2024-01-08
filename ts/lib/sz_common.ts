@@ -1,4 +1,4 @@
-import { szdefine } from "./sz_define";
+import { szdef } from "./sz_define";
 
 export namespace szcommon {
     // 条件比较函数 返回-1、0、1
@@ -112,15 +112,15 @@ export namespace szcommon {
      * @returns 
      */
     export function number2UnitStr(num: number, fixedPoint: number = 1): string {
-        if (num < szdefine.THOUSAND_MULTIPLE) {
+        if (num < szdef.THOUSAND_MULTIPLE) {
             return num.toString();
-        } else if (num < szdefine.MILLION_MULTIPLE) {
+        } else if (num < szdef.MILLION_MULTIPLE) {
             return (Math.floor(num / Math.pow(10, 3 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "K";
-        } else if (num < szdefine.BILLION_MULTIPLE) {
+        } else if (num < szdef.BILLION_MULTIPLE) {
             return (Math.floor(num / Math.pow(10, 6 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "M";
-        } else if (num < szdefine.TRILLION_MULTIPLE) {
+        } else if (num < szdef.TRILLION_MULTIPLE) {
             return (Math.floor(num / Math.pow(10, 9 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "G";
-        } else if (num < szdefine.QUADRILLION_MULTIPLE) {
+        } else if (num < szdef.QUADRILLION_MULTIPLE) {
             return (Math.floor(num / Math.pow(10, 12 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "T";
         } else {
             return (Math.floor(num / Math.pow(10, 15 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "P";

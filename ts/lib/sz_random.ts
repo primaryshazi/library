@@ -1,9 +1,9 @@
 import { szcommon } from "./sz_common";
 
 /**
-    * 线性同余随机数生成
-    * 默认范围[0, 1)
-    */
+ * 线性同余随机数生成
+ * 默认范围[0, 1)
+ */
 export class SZLinearCongruentialGenerator {
     private seed: number;
     private readonly a: number;
