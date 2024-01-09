@@ -15,7 +15,7 @@ export class SZStack<T> extends SZArray<T> {
      * 获取栈顶元素
      * @returns 
      */
-    public top(): szdef.CAPACITY_VALUE_TYPE<T> {
+    public top(): szdef.VALUE_TYPE<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[this.size_ - 1];
         }

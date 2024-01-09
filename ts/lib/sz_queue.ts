@@ -15,7 +15,7 @@ export class SZQueue<T> extends SZArray<T> {
      * 获取队首元素
      * @returns 
      */
-    public front(): szdef.CAPACITY_VALUE_TYPE<T> {
+    public front(): szdef.VALUE_TYPE<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[0];
         }
@@ -27,7 +27,7 @@ export class SZQueue<T> extends SZArray<T> {
      * 获得队尾元素
      * @returns 
      */
-    public back(): szdef.CAPACITY_VALUE_TYPE<T> {
+    public back(): szdef.VALUE_TYPE<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[this.size_ - 1];
         }

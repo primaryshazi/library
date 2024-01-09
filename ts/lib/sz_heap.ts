@@ -4,14 +4,14 @@ import { szdef } from "./sz_define";
 
 export class SZHeap<T> extends SZArray<T> {
     // 比较函数，用于构建最大堆或者最小堆
-    private compare_: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare;
+    private compare_: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater;
 
     /**
      * 构建堆
      * @param cap 容量
      * @param compare 比较函数 用于构建最大堆或者最小堆
      */
-    public constructor(cap: number = szdef.DEFAULT_CAPACITY, compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
+    public constructor(cap: number = szdef.DEFAULT_CAPACITY, compare: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater) {
         super(cap);
         this.compare_ = compare;
     }
@@ -19,7 +19,7 @@ export class SZHeap<T> extends SZArray<T> {
     /**
      * 获取比较函数
      */
-    public get compare(): szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> {
+    public get compare(): szcommon.Compare<szdef.VALUE_TYPE<T>> {
         return this.compare_;
     }
 
@@ -27,7 +27,7 @@ export class SZHeap<T> extends SZArray<T> {
      * 获取堆顶元素
      * @returns 
      */
-    public top(): szdef.CAPACITY_VALUE_TYPE<T> {
+    public top(): szdef.VALUE_TYPE<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[0];
         }
@@ -102,7 +102,7 @@ export class SZHeap<T> extends SZArray<T> {
      * @param array 
      * @param compare 
      */
-    static buildHeap<T>(array: Array<szdef.CAPACITY_VALUE_TYPE<T>>, compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
+    static buildHeap<T>(array: Array<szdef.VALUE_TYPE<T>>, compare: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater) {
         for (let index = array.length - 1; index >= 0; index--) {
             let cur = index;
             while (cur < array.length) {

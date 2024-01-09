@@ -2,7 +2,7 @@ import { szdef } from "./sz_define";
 
 export namespace szcommon {
     // 条件比较函数 返回-1、0、1
-    export type conditonCompare<T> = (a: T, b: T) => number;
+    export type Compare<T> = (a: T, b: T) => number;
 
     export function isValidValue<T>(value: T): boolean {
         return value != undefined && value != null;
@@ -14,7 +14,7 @@ export namespace szcommon {
      * @param b
      * @returns 0:a等于b; -1:a小于b; 1:a大于b
      */
-    export function lessCompare<T>(a: T, b: T): number {
+    export function less<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
         }
@@ -36,7 +36,7 @@ export namespace szcommon {
      * @param b
      * @returns 0:a等于b; -1:a大于b; 1:a小于b
      */
-    export function greaterCompare<T>(a: T, b: T): number {
+    export function greater<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
         }
@@ -59,7 +59,7 @@ export namespace szcommon {
      * @param compare 0:a等于b; -1:a小于b; 1:a大于b
      * @returns -1:未找到 >0:找到
      */
-    export function binarySearch<T>(arr: T[], target: T, compare: conditonCompare<T> = lessCompare): number {
+    export function binarySearch<T>(arr: T[], target: T, compare: Compare<T> = less): number {
         let left = 0;
         let right = arr.length - 1;
 
@@ -85,7 +85,7 @@ export namespace szcommon {
      * @param compare 
      * @returns 
      */
-    export function isSorted<T>(array: T[], compare: conditonCompare<T> = lessCompare): boolean {
+    export function isSorted<T>(array: T[], compare: Compare<T> = less): boolean {
         for (let i = 0; i < array.length - 1; i++) {
             if (compare(array[i], array[i + 1]) > 0) {
                 return false;
