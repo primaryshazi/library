@@ -8,10 +8,11 @@ export class SZHeap<T> extends SZArray<T> {
 
     /**
      * 构建堆
+     * @param cap 容量
      * @param compare 比较函数 用于构建最大堆或者最小堆
      */
-    public constructor(compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
-        super();
+    public constructor(cap: number = szdef.DEFAULT_CAPACITY, compare: szcommon.conditonCompare<szdef.CAPACITY_VALUE_TYPE<T>> = szcommon.greaterCompare) {
+        super(cap);
         this.compare_ = compare;
     }
 

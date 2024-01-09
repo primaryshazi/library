@@ -3,8 +3,12 @@ import { szcommon } from "./sz_common";
 import { szdef } from "./sz_define";
 
 export class SZQueue<T> extends SZArray<T> {
-    public constructor() {
-        super();
+    /**
+     * 构建队列
+     * @param cap 容量
+     */
+    public constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+        super(cap);
     }
 
     /**

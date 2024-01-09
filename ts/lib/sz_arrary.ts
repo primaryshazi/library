@@ -7,8 +7,14 @@ export abstract class SZArray<T> {
     // 元素个数
     protected size_: number = 0;
 
-    constructor() {
-        this.data_ = new Array<szdef.CAPACITY_VALUE_TYPE<T>>(szdef.DEFAULT_CAPACITY).fill(undefined);
+    /**
+     * 构建数组
+     * @param cap 容量
+     */
+    constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+        cap = Math.floor(cap);
+        cap = Math.max(cap, 1);
+        this.data_ = new Array<szdef.CAPACITY_VALUE_TYPE<T>>(cap).fill(undefined);
         this.size_ = 0;
     }
 

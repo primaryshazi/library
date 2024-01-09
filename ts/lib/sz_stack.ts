@@ -3,8 +3,12 @@ import { szcommon } from "./sz_common";
 import { szdef } from "./sz_define";
 
 export class SZStack<T> extends SZArray<T> {
-    public constructor() {
-        super();
+    /**
+     * 构建栈
+     * @param cap 容量
+     */
+    public constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+        super(cap);
     }
 
     /**
