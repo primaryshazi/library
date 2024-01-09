@@ -61,8 +61,8 @@ export class SZKeyNode<T> {
 export class SZKVNode<X, Y> {
     public key: X;
     public value: Y;
-    public left: SZKVNode<X, Y> | null;
-    public right: SZKVNode<X, Y> | null;
+    public left: szdef.NODE_TYPE<SZKVNode<X, Y>>;
+    public right: szdef.NODE_TYPE<SZKVNode<X, Y>>;
     public constructor(k: X, v: Y) {
         this.key = k;
         this.value = v;
