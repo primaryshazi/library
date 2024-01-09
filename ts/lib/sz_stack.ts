@@ -44,7 +44,7 @@ export class SZStack<T> extends SZArray<T> {
             return;
         }
 
-        this.size--;
+        this.size_--;
         this.data_[this.size_] = undefined;
     }
 }
