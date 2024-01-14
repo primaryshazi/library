@@ -207,6 +207,15 @@ export namespace szdate {
     }
 
     /**
+     * 当前时间格式化为时间
+     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @returns 
+     */
+    export function now2str(format: string = "%Y-%M-%D %h:%m:%s"): string {
+        return time2str(Date.now(), format);
+    }
+
+    /**
      * 获取当前年份
      * @param ms
      * @returns 9999
