@@ -80,37 +80,37 @@ export namespace SZDATE {
             return new Date(0);
         }
 
-        let mIdx = new Map<number, number>();
+        let idxs = [0, 0, 0, 0, 0, 0, 0];
 
         let index: number = 1;
         let regFormat: string = format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)|(\\)|(\()|(\))|(\[)|(\])|(\{)|(\})|(\^)|(\$)|(\?)|(\+)|(\|)|(\*)/g,
             (match, Y, M, D, h, m, s, z, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13) => {
                 if (Y) {
-                    mIdx.set(1, index);
+                    idxs[0] = index;
                     index++;
                     return "(\\d{4})";
                 } else if (M) {
-                    mIdx.set(2, index);
+                    idxs[1] = index;
                     index++;
                     return "(\\d{2})";
                 } else if (D) {
-                    mIdx.set(3, index);
+                    idxs[2] = index;
                     index++;
                     return "(\\d{2})";
                 } else if (h) {
-                    mIdx.set(4, index);
+                    idxs[3] = index;
                     index++;
                     return "(\\d{2})";
                 } else if (m) {
-                    mIdx.set(5, index);
+                    idxs[4] = index;
                     index++;
                     return "(\\d{2})";
                 } else if (s) {
-                    mIdx.set(6, index);
+                    idxs[5] = index;
                     index++;
                     return "(\\d{2})";
                 } else if (z) {
-                    mIdx.set(7, index);
+                    idxs[6] = index;
                     index++;
                     return "(\\d{3})";
                 } else if (x1) {
@@ -150,47 +150,13 @@ export namespace SZDATE {
             return new Date(0);
         }
 
-        let year: number = 0;
-        let month: number = 0;
-        let day: number = 0;
-        let hour: number = 0;
-        let minute: number = 0;
-        let second: number = 0;
-        let micsecond: number = 0;
-        for (let [p, i] of mIdx) {
-            switch (p) {
-                case 1: {
-                    year = parseInt(result[i]);
-                    break;
-                }
-                case 2: {
-                    month = parseInt(result[i]) - 1;
-                    break;
-                }
-                case 3: {
-                    day = parseInt(result[i]);
-                    break;
-                }
-                case 4: {
-                    hour = parseInt(result[i]);
-                    break;
-                }
-                case 5: {
-                    minute = parseInt(result[i]);
-                    break;
-                }
-                case 6: {
-                    second = parseInt(result[i]);
-                    break;
-                }
-                case 7: {
-                    micsecond = parseInt(result[i]);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        let year: number = idxs[0] >= 1 ? parseInt(result[idxs[0]]) : 0;
+        let month: number = idxs[1] >= 1 ? parseInt(result[idxs[1]]) : 0;
+        let day: number = idxs[2] >= 1 ? parseInt(result[idxs[2]]) : 0;
+        let hour: number = idxs[3] >= 1 ? parseInt(result[idxs[3]]) : 0;
+        let minute: number = idxs[4] >= 1 ? parseInt(result[idxs[4]]) : 0;
+        let second: number = idxs[5] >= 1 ? parseInt(result[idxs[5]]) : 0;
+        let micsecond: number = idxs[6] >= 1 ? parseInt(result[idxs[6]]) : 0;
 
         return new Date(year, month, day, hour, minute, second, micsecond);
     }
