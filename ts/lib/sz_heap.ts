@@ -1,17 +1,17 @@
-import { SZArray } from "./sz_arrary";
-import { szcommon } from "./sz_common";
-import { szdef } from "./sz_define";
+import { SZArray, SZElementType } from "./sz_arrary";
+import { SZCOMMON } from "./sz_common";
+import { SZDEF } from "./sz_define";
 
 export class SZHeap<T> extends SZArray<T> {
     // 比较函数，用于构建最大堆或者最小堆
-    private compare_: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater;
+    private compare_: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater;
 
     /**
      * 构建堆
      * @param cap 容量
      * @param compare 比较函数 用于构建最大堆或者最小堆
      */
-    public constructor(cap: number = szdef.DEFAULT_CAPACITY, compare: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater) {
+    public constructor(cap: number = SZDEF.DEFAULT_CAPACITY, compare: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater) {
         super(cap);
         this.compare_ = compare;
     }
@@ -19,7 +19,7 @@ export class SZHeap<T> extends SZArray<T> {
     /**
      * 获取比较函数
      */
-    public get compare(): szcommon.Compare<szdef.VALUE_TYPE<T>> {
+    public get compare(): SZCOMMON.Compare<SZElementType<T>> {
         return this.compare_;
     }
 
@@ -27,7 +27,7 @@ export class SZHeap<T> extends SZArray<T> {
      * 获取堆顶元素
      * @returns 
      */
-    public top(): szdef.VALUE_TYPE<T> {
+    public top(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[0];
         }
@@ -40,7 +40,7 @@ export class SZHeap<T> extends SZArray<T> {
      * @param value 
      */
     public push(value: T) {
-        if (!szcommon.isValidValue(value)) {
+        if (!SZCOMMON.isValidValue(value)) {
             throw new Error("push error");
         }
 
@@ -102,7 +102,7 @@ export class SZHeap<T> extends SZArray<T> {
      * @param array 
      * @param compare 
      */
-    static buildHeap<T>(array: Array<szdef.VALUE_TYPE<T>>, compare: szcommon.Compare<szdef.VALUE_TYPE<T>> = szcommon.greater) {
+    static buildHeap<T>(array: Array<SZElementType<T>>, compare: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater) {
         for (let index = array.length - 1; index >= 0; index--) {
             let cur = index;
             while (cur < array.length) {

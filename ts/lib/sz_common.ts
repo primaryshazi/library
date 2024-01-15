@@ -1,6 +1,6 @@
-import { szdef } from "./sz_define";
+import { SZDEF } from "./sz_define";
 
-export namespace szcommon {
+export namespace SZCOMMON {
     // 条件比较函数 返回-1、0、1
     export type Compare<T> = (a: T, b: T) => number;
 
@@ -112,19 +112,30 @@ export namespace szcommon {
      * @returns 
      */
     export function number2UnitStr(num: number, fixedPoint: number = 1): string {
-        if (num < szdef.THOUSAND_MULTIPLE) {
-            return num.toString();
-        } else if (num < szdef.MILLION_MULTIPLE) {
-            return (Math.floor(num / Math.pow(10, 3 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "K";
-        } else if (num < szdef.BILLION_MULTIPLE) {
-            return (Math.floor(num / Math.pow(10, 6 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "M";
-        } else if (num < szdef.TRILLION_MULTIPLE) {
-            return (Math.floor(num / Math.pow(10, 9 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "G";
-        } else if (num < szdef.QUADRILLION_MULTIPLE) {
-            return (Math.floor(num / Math.pow(10, 12 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "T";
+        let digit: number = 0;
+        let suffix: string = "";
+
+        if (num < SZDEF.THOUSAND_MULTIPLE) {
+            digit = 0;
+            suffix = "";
+        } else if (num < SZDEF.MILLION_MULTIPLE) {
+            digit = 3;
+            suffix = "K";
+        } else if (num < SZDEF.BILLION_MULTIPLE) {
+            digit = 6;
+            suffix = "M";
+        } else if (num < SZDEF.TRILLION_MULTIPLE) {
+            digit = 9;
+            suffix = "G";
+        } else if (num < SZDEF.QUADRILLION_MULTIPLE) {
+            digit = 12;
+            suffix = "T";
         } else {
-            return (Math.floor(num / Math.pow(10, 15 - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + "P";
+            digit = 15;
+            suffix = "P";
         }
+
+        return (Math.floor(num / Math.pow(10, digit - fixedPoint)) / Math.pow(10, fixedPoint)).toFixed(fixedPoint) + suffix;
     }
 
     /**

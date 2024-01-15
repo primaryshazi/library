@@ -1,8 +1,11 @@
-import { szdef } from "./sz_define";
+import { SZDEF } from "./sz_define";
+
+// 容器值类型
+export type SZElementType<T> = T | undefined;
 
 export abstract class SZArray<T> {
     // 存储数据
-    protected data_: Array<szdef.VALUE_TYPE<T>> = [];
+    protected data_: Array<SZElementType<T>> = [];
 
     // 元素个数
     protected size_: number = 0;
@@ -11,10 +14,10 @@ export abstract class SZArray<T> {
      * 构建数组
      * @param cap 容量
      */
-    constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+    constructor(cap: number = SZDEF.DEFAULT_CAPACITY) {
         cap = Math.floor(cap);
         cap = Math.max(cap, 1);
-        this.data_ = new Array<szdef.VALUE_TYPE<T>>(cap).fill(undefined);
+        this.data_ = new Array<SZElementType<T>>(cap).fill(undefined);
         this.size_ = 0;
     }
 
@@ -67,7 +70,7 @@ export abstract class SZArray<T> {
         if (c < this.data_.length) {
             this.data_.length = c;
         } else {
-            this.data_.push(...new Array<szdef.VALUE_TYPE<T>>(c - this.data_.length).fill(undefined));
+            this.data_.push(...new Array<SZElementType<T>>(c - this.data_.length).fill(undefined));
         }
 
         if (this.size_ > this.data_.length) {
@@ -88,6 +91,6 @@ export abstract class SZArray<T> {
      * 重新扩容
      */
     protected expandCapacity() {
-        this.data_.push(...new Array<szdef.VALUE_TYPE<T>>(Math.ceil(this.data_.length * (szdef.DEFAULT_GROWTH_FACTOR - 1))).fill(undefined));
+        this.data_.push(...new Array<SZElementType<T>>(Math.ceil(this.data_.length * (SZDEF.DEFAULT_GROWTH_FACTOR - 1))).fill(undefined));
     }
 }

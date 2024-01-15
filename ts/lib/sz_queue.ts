@@ -1,13 +1,13 @@
-import { SZArray } from "./sz_arrary";
-import { szcommon } from "./sz_common";
-import { szdef } from "./sz_define";
+import { SZArray, SZElementType } from "./sz_arrary";
+import { SZCOMMON } from "./sz_common";
+import { SZDEF } from "./sz_define";
 
 export class SZQueue<T> extends SZArray<T> {
     /**
      * 构建队列
      * @param cap 容量
      */
-    public constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+    public constructor(cap: number = SZDEF.DEFAULT_CAPACITY) {
         super(cap);
     }
 
@@ -15,7 +15,7 @@ export class SZQueue<T> extends SZArray<T> {
      * 获取队首元素
      * @returns 
      */
-    public front(): szdef.VALUE_TYPE<T> {
+    public front(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[0];
         }
@@ -27,7 +27,7 @@ export class SZQueue<T> extends SZArray<T> {
      * 获得队尾元素
      * @returns 
      */
-    public back(): szdef.VALUE_TYPE<T> {
+    public back(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[this.size_ - 1];
         }
@@ -40,7 +40,7 @@ export class SZQueue<T> extends SZArray<T> {
      * @param value 
      */
     public push(value: T) {
-        if (!szcommon.isValidValue(value)) {
+        if (!SZCOMMON.isValidValue(value)) {
             throw new Error("push error");
         }
 

@@ -1,13 +1,13 @@
-import { SZArray } from "./sz_arrary";
-import { szcommon } from "./sz_common";
-import { szdef } from "./sz_define";
+import { SZArray, SZElementType } from "./sz_arrary";
+import { SZCOMMON } from "./sz_common";
+import { SZDEF } from "./sz_define";
 
 export class SZStack<T> extends SZArray<T> {
     /**
      * 构建栈
      * @param cap 容量
      */
-    public constructor(cap: number = szdef.DEFAULT_CAPACITY) {
+    public constructor(cap: number = SZDEF.DEFAULT_CAPACITY) {
         super(cap);
     }
 
@@ -15,7 +15,7 @@ export class SZStack<T> extends SZArray<T> {
      * 获取栈顶元素
      * @returns 
      */
-    public top(): szdef.VALUE_TYPE<T> {
+    public top(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[this.size_ - 1];
         }
@@ -28,7 +28,7 @@ export class SZStack<T> extends SZArray<T> {
      * @param value 
      */
     public push(value: T) {
-        if (!szcommon.isValidValue(value)) {
+        if (!SZCOMMON.isValidValue(value)) {
             throw new Error("push error");
         }
 

@@ -1,4 +1,4 @@
-import { szcommon } from "./sz_common";
+import { SZCOMMON } from "./sz_common";
 
 /**
  * 线性同余随机数生成
@@ -277,7 +277,7 @@ export class SZIntegerListDistributionGenerator {
             }
             repairTimes++;
 
-            szcommon.shuffle(this.indexList_);
+            SZCOMMON.shuffle(this.indexList_);
             let step = Math.ceil(Math.abs(diff) / this.listLength_);
             for (let i of this.indexList_) {
                 if (this.expectationProbabilities_[i] == 0) {
@@ -303,7 +303,7 @@ export class SZIntegerListDistributionGenerator {
             let sum = result.reduce((p, c) => p + c);
             let diff = this.summary_ - sum;
             if (diff != 0) {
-                szcommon.shuffle(this.indexList_);
+                SZCOMMON.shuffle(this.indexList_);
                 for (let i of this.indexList_) {
                     if (this.expectationProbabilities_[i] == 0) {
                         continue;

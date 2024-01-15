@@ -1,8 +1,4 @@
-export namespace szdef {
-    //  容器节点类型
-    export type NODE_TYPE<T> = T | null;
-    // 容器值类型
-    export type VALUE_TYPE<T> = T | undefined;
+export namespace SZDEF {
     // 容器默认初始大小
     export const DEFAULT_CAPACITY = 16;
     // 容器默认倍增系数
