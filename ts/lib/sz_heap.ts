@@ -55,7 +55,6 @@ export class SZHeap<T> extends SZArray<T> {
         let next = Math.floor((cur - 1) / 2);
         while (cur > 0 && this.compare_(this.data_[cur], this.data_[next]) == -1) {
             [this.data_[cur], this.data_[next]] = [this.data_[next], this.data_[cur]];
-
             cur = next;
             next = Math.floor((cur - 1) / 2);
         }

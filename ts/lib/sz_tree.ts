@@ -77,6 +77,7 @@ export class SZKVNode<X, Y> {
         if (a != null && b != null) {
             return a.key == b.key;
         }
+
         return a == b;
     }
 
