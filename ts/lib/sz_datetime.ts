@@ -151,7 +151,7 @@ export namespace SZDATE {
         }
 
         let year: number = idxs[0] >= 1 ? parseInt(result[idxs[0]]) : 0;
-        let month: number = idxs[1] >= 1 ? parseInt(result[idxs[1]]) : 0;
+        let month: number = idxs[1] >= 1 ? parseInt(result[idxs[1]]) - 1 : 0;
         let day: number = idxs[2] >= 1 ? parseInt(result[idxs[2]]) : 0;
         let hour: number = idxs[3] >= 1 ? parseInt(result[idxs[3]]) : 0;
         let minute: number = idxs[4] >= 1 ? parseInt(result[idxs[4]]) : 0;
