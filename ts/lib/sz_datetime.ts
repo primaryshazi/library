@@ -1,5 +1,13 @@
 export namespace SZDATE {
     /**
+     * 获取单调时间
+     * @returns 
+     */
+    export function steadyMs(): number {
+        return performance.now() | 0;
+    }
+
+    /**
      * 倒计时格式化 
      * @param ms
      * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
