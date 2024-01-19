@@ -57,7 +57,7 @@ export namespace SZCOMMON {
      * @param arr
      * @param target
      * @param compare 0:a等于b; -1:a小于b; 1:a大于b
-     * @returns -1:未找到 >0:找到
+     * @returns -1:未找到 >=0:找到
      */
     export function binarySearch<T>(arr: T[], target: T, compare: Compare<T> = less): number {
         let left = 0;
@@ -103,7 +103,6 @@ export namespace SZCOMMON {
     export function randRangeInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
-
 
     /**
      * 数字转换为携带单位的字符串
@@ -310,4 +309,23 @@ export namespace SZCOMMON {
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
+
+    /**
+     * 角度转弧度
+     * @param angle 
+     * @returns 
+     */
+    export function angle2Radian(angle: number): number {
+        return angle * Math.PI / 180;
+    }
+
+    /**
+     * 弧度转角度
+     * @param radian 
+     * @returns 
+     */
+    export function radian2Angle(radian: number): number {
+        return radian * 180 / Math.PI;
+    }
+
 } // namespace szutils
