@@ -27,7 +27,7 @@ export class SZLinearCongruentialGenerator {
  * 梅森缠绕器随机数生成
  * 默认范围[0, 1)
  */
-export class MersenneTwisterGenerator {
+export class SZMersenneTwisterGenerator {
     private readonly N: number = 624;
     private readonly M: number = 397;
     private readonly MATRIX_A: number = 0x9908b0df;
@@ -122,7 +122,7 @@ export class SZCarrySubtractGenerator {
  * 产生区间 [0, ls.len) 上的随机整数
  * 每个数的概率为ls[i]/Sum(ls[i]);
  */
-export class DiscreteDistributionGenerator {
+export class SZDiscreteDistributionGenerator {
     // 随机数引擎
     private gen_: SZLinearCongruentialGenerator;
 

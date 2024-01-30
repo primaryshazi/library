@@ -13,7 +13,7 @@ export class SZQueue<T> extends SZArray<T> {
 
     /**
      * 获取队首元素
-     * @returns 
+     * @returns
      */
     public front(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
@@ -25,7 +25,7 @@ export class SZQueue<T> extends SZArray<T> {
 
     /**
      * 获得队尾元素
-     * @returns 
+     * @returns
      */
     public back(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
@@ -37,7 +37,7 @@ export class SZQueue<T> extends SZArray<T> {
 
     /**
      * 推入元素
-     * @param value 
+     * @param value
      */
     public push(value: T) {
         if (!SZCOMMON.isValidValue(value)) {
@@ -61,10 +61,7 @@ export class SZQueue<T> extends SZArray<T> {
         }
 
         this.size_--;
-        if (this.data_.length == 1) {
-            this.data_[0] = undefined;
-        } else {
-            this.data_.shift();
-        }
+        this.data_.shift();
+        this.data_.push(undefined);
     }
 }
