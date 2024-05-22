@@ -1,14 +1,14 @@
-export namespace SZDATE {
+export namespace SZDT {
     /**
      * 获取单调时间
-     * @returns 
+     * @returns
      */
     export function steadyMs(): number {
         return performance.now() | 0;
     }
 
     /**
-     * 倒计时格式化 
+     * 倒计时格式化
      * @param ms
      * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
@@ -183,7 +183,7 @@ export namespace SZDATE {
     /**
      * 当前时间格式化为时间
      * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
-     * @returns 
+     * @returns
      */
     export function now2str(format: string = "%Y-%M-%D %h:%m:%s"): string {
         return time2str(Date.now(), format);
@@ -203,31 +203,45 @@ export namespace SZDATE {
     /**
      * 获取下一年
      * @param ms
+     * @param next >0: 下N年  <0: 上N年
      * @returns [1970, 9999]
      */
-    export function getNextYear(ms: number): number {
-        let cur = getYear(ms);
-        if (cur >= 9999) {
+    export function getNextYear(ms: number, next: number = 1): number {
+        if (next == 0) {
+            return getYear(ms);
+        } else if (next < 0) {
+            return getPrevYear(ms, -next);
+        }
+
+        let nextYear = getYear(ms) + next;
+        if (nextYear >= 9999) {
             return 9999;
-        } else if (cur < 1970) {
+        } else if (nextYear < 1970) {
             return 1970;
         }
-        return cur + 1;
+        return nextYear;
     }
 
     /**
      * 获取上一年
      * @param ms
+     * @param prev >0: 上N年  <0: 下N年
      * @returns [1970, 9999]
      */
-    export function getPrevYear(ms: number): number {
-        let cur = getYear(ms);
-        if (cur > 9999) {
+    export function getPrevYear(ms: number, prev: number = 1): number {
+        if (prev == 0) {
+            return getYear(ms);
+        } else if (prev < 0) {
+            return getNextYear(ms, -prev);
+        }
+
+        let prevYear = getYear(ms) - prev;
+        if (prevYear > 9999) {
             return 9999;
-        } else if (cur <= 1970) {
+        } else if (prevYear <= 1970) {
             return 1970;
         }
-        return cur - 1;
+        return prevYear;
     }
 
     /**
@@ -244,53 +258,79 @@ export namespace SZDATE {
     /**
      * 获取下一月
      * @param ms
+     * @param next >0: 下N月  <0: 上N月
      * @returns [197001, 999912]
      */
-    export function getNextMonth(ms: number): number {
-        let cur = getMonth(ms);
-        if (cur >= 999912) {
-            return 999912;
-        } else if (cur < 197001) {
-            return 197001;
+    export function getNextMonth(ms: number, next: number = 1): number {
+        if (next == 0) {
+            return getMonth(ms);
+        } else if (next < 0) {
+            return getPrevMonth(ms, -next);
         }
+
+        let cur = getMonth(ms);
 
         let year = Math.floor(cur / 100);
         let month = cur % 100;
 
-        if (month >= 12) {
-            year += 1;
-            month = 1;
+        let addYear = Math.floor(next / 12);
+        let addMonth = next % 12;
+
+        if (month + addMonth > 12) {
+            year += addYear + 1;
+            month = month + addMonth - 12;
         } else {
-            month += 1;
+            year += addYear;
+            month += addMonth;
         }
 
-        return year * 100 + month;
+        let nextMonth = year * 100 + month;
+        if (nextMonth > 999912) {
+            return 999912;
+        } else if (nextMonth <= 197001) {
+            return 197001;
+        }
+
+        return nextMonth;
     }
 
     /**
      * 获取上一月
      * @param ms
+     * @param prev >0: 上N月  <0: 下N月
      * @returns [197001, 999912]
      */
-    export function getPrevMonth(ms: number): number {
-        let cur = getMonth(ms);
-        if (cur > 999912) {
-            return 999912;
-        } else if (cur <= 197001) {
-            return 197001;
+    export function getPrevMonth(ms: number, prev: number = 1): number {
+        if (prev == 0) {
+            return getMonth(ms);
+        } else if (prev < 0) {
+            return getNextMonth(ms, -prev);
         }
+
+        let cur = getMonth(ms);
 
         let year = Math.floor(cur / 100);
         let month = cur % 100;
 
-        if (month <= 1) {
-            year -= 1;
-            month = 12;
+        let addYear = Math.floor(prev / 12);
+        let addMonth = prev % 12;
+
+        if (month - addMonth < 1) {
+            year -= addYear + 1;
+            month = month - addMonth + 12;
         } else {
-            month -= 1;
+            year -= addYear;
+            month -= addMonth;
         }
 
-        return year * 100 + month;
+        let nextMonth = year * 100 + month;
+        if (nextMonth > 999912) {
+            return 999912;
+        } else if (nextMonth <= 197001) {
+            return 197001;
+        }
+
+        return nextMonth;
     }
 
     /**
@@ -307,20 +347,22 @@ export namespace SZDATE {
     /**
      * 获取下一天
      * @param ms
+     * @param next >0: 下N天  <0: 上N天
      * @returns [19700101, 99991231]
      */
-    export function getNextDay(ms: number): number {
-        let cur = getDay(ms + 86400000);
+    export function getNextDay(ms: number, next: number = 1): number {
+        let cur = getDay(ms + 86400000 * next);
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
     /**
      * 获取上一天
      * @param ms
+     * @param prev >0: 上N天  <0: 下N天
      * @returns [19700101, 99991231]
      */
-    export function getPrevDay(ms: number): number {
-        let cur = getDay(ms - 86400000);
+    export function getPrevDay(ms: number, prev: number = 1): number {
+        let cur = getDay(ms - 86400000 * prev);
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
