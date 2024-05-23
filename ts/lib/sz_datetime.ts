@@ -368,6 +368,7 @@ export namespace SZDT {
 
     /**
      * 获得当前月有多少天
+     * @param ms
      */
     export function getCurMonthDays(ms: number) {
         return getPrevDay(str2time((getNextMonth(ms) * 100 + 1).toString(), "%Y%M%D")) % 100;
@@ -383,11 +384,11 @@ export namespace SZDT {
             return -1;
         }
 
-        let startDate = getDay(startMs);
-        let endDate = getDay(endMs);
-        let startZeroMs = str2time(startDate.toString(), "%Y%M%D");
-        let endZeroMs = str2time(endDate.toString(), "%Y%M%D");
+        let startDate = new Date(startMs);
+        let endDate = new Date(endMs);
+        let startZeroMs = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+        let endZeroMs = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
 
-        return Math.floor((endZeroMs - startZeroMs) / (86400 * 1000))
+        return Math.floor((endZeroMs - startZeroMs) / 86400000);
     }
 } // namespace sz
