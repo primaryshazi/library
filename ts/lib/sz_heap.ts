@@ -25,7 +25,7 @@ export class SZHeap<T> extends SZArray<T> {
 
     /**
      * 获取堆顶元素
-     * @returns 
+     * @returns
      */
     public top(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
@@ -37,13 +37,9 @@ export class SZHeap<T> extends SZArray<T> {
 
     /**
      * 推入元素
-     * @param value 
+     * @param value
      */
     public push(value: T) {
-        if (!SZCOMMON.isValidValue(value)) {
-            throw new Error("push error");
-        }
-
         if (this.size >= this.data_.length) {
             this.expandCapacity();
         }
@@ -98,8 +94,8 @@ export class SZHeap<T> extends SZArray<T> {
 
     /**
      * 构建一个堆
-     * @param array 
-     * @param compare 
+     * @param array
+     * @param compare
      */
     static buildHeap<T>(array: Array<SZElementType<T>>, compare: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater) {
         for (let index = array.length - 1; index >= 0; index--) {

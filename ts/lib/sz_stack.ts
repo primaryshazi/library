@@ -13,7 +13,7 @@ export class SZStack<T> extends SZArray<T> {
 
     /**
      * 获取栈顶元素
-     * @returns 
+     * @returns
      */
     public top(): SZElementType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
@@ -25,13 +25,9 @@ export class SZStack<T> extends SZArray<T> {
 
     /**
      * 推入元素
-     * @param value 
+     * @param value
      */
     public push(value: T) {
-        if (!SZCOMMON.isValidValue(value)) {
-            throw new Error("push error");
-        }
-
         if (this.size >= this.data_.length) {
             this.expandCapacity();
         }

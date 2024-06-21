@@ -40,10 +40,6 @@ export class SZQueue<T> extends SZArray<T> {
      * @param value
      */
     public push(value: T) {
-        if (!SZCOMMON.isValidValue(value)) {
-            throw new Error("push error");
-        }
-
         if (this.size_ >= this.data_.length) {
             this.expandCapacity();
         }
