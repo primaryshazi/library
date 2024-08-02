@@ -1,4 +1,7 @@
 export namespace SZDEF {
+    // 容器值类型
+    export type ElemType<T> = T | null;
+
     // 容器默认初始大小
     export const DEFAULT_CAPACITY = 16;
     // 容器默认倍增系数

@@ -1,17 +1,17 @@
-import { SZArray, SZElementType } from "./sz_arrary";
+import { SZArray } from "./sz_arrary";
 import { SZCOMMON } from "./sz_common";
 import { SZDEF } from "./sz_define";
 
 export class SZHeap<T> extends SZArray<T> {
     // 比较函数，用于构建最大堆或者最小堆
-    private compare_: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater;
+    private compare_: SZCOMMON.Compare<SZDEF.ElemType<T>> = SZCOMMON.greater;
 
     /**
      * 构建堆
      * @param cap 容量
      * @param compare 比较函数 用于构建最大堆或者最小堆
      */
-    public constructor(cap: number = SZDEF.DEFAULT_CAPACITY, compare: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater) {
+    public constructor(cap: number = SZDEF.DEFAULT_CAPACITY, compare: SZCOMMON.Compare<SZDEF.ElemType<T>> = SZCOMMON.greater) {
         super(cap);
         this.compare_ = compare;
     }
@@ -19,7 +19,7 @@ export class SZHeap<T> extends SZArray<T> {
     /**
      * 获取比较函数
      */
-    public get compare(): SZCOMMON.Compare<SZElementType<T>> {
+    public get compare(): SZCOMMON.Compare<SZDEF.ElemType<T>> {
         return this.compare_;
     }
 
@@ -27,12 +27,12 @@ export class SZHeap<T> extends SZArray<T> {
      * 获取堆顶元素
      * @returns
      */
-    public top(): SZElementType<T> {
+    public top(): SZDEF.ElemType<T> {
         if (this.size_ > 0 && this.data_.length > 0) {
             return this.data_[0];
         }
 
-        return undefined;
+        return null;
     }
 
     /**
@@ -89,7 +89,7 @@ export class SZHeap<T> extends SZArray<T> {
             }
         }
 
-        this.data_[this.size_] = undefined;
+        this.data_[this.size_] = null;
     }
 
     /**
@@ -97,7 +97,7 @@ export class SZHeap<T> extends SZArray<T> {
      * @param array
      * @param compare
      */
-    static buildHeap<T>(array: Array<SZElementType<T>>, compare: SZCOMMON.Compare<SZElementType<T>> = SZCOMMON.greater) {
+    static buildHeap<T>(array: Array<SZDEF.ElemType<T>>, compare: SZCOMMON.Compare<SZDEF.ElemType<T>> = SZCOMMON.greater) {
         for (let index = array.length - 1; index >= 0; index--) {
             let cur = index;
             while (cur < array.length) {

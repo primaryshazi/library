@@ -4,10 +4,6 @@ export namespace SZCOMMON {
     // 条件比较函数 返回-1、0、1
     export type Compare<T> = (a: T, b: T) => number;
 
-    export function isValidValue<T>(value: T): boolean {
-        return value != undefined && value != null;
-    }
-
     /**
      * 小优先比较函数
      * @param a
@@ -17,14 +13,6 @@ export namespace SZCOMMON {
     export function less<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
-        }
-
-        if (!isValidValue(a)) {
-            return -1;
-        }
-
-        if (!isValidValue(b)) {
-            return 1;
         }
 
         return a < b ? -1 : 1;
@@ -39,14 +27,6 @@ export namespace SZCOMMON {
     export function greater<T>(a: T, b: T): number {
         if (a == b) {
             return 0;
-        }
-
-        if (!isValidValue(a)) {
-            return 1;
-        }
-
-        if (!isValidValue(b)) {
-            return -1;
         }
 
         return a > b ? -1 : 1;
