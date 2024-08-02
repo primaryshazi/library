@@ -81,9 +81,9 @@ export namespace SZCOMMON {
 
     /**
      * 判断数组是否有序
-     * @param array 
-     * @param compare 
-     * @returns 
+     * @param array
+     * @param compare
+     * @returns
      */
     export function isSorted<T>(array: T[], compare: Compare<T> = less): boolean {
         for (let i = 0; i < array.length - 1; i++) {
@@ -96,9 +96,9 @@ export namespace SZCOMMON {
 
     /**
      * 生成范围内的随机数 [min, max]
-     * @param min 
-     * @param max 
-     * @returns 
+     * @param min
+     * @param max
+     * @returns
      */
     export function randRangeInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1) + min);
@@ -106,9 +106,9 @@ export namespace SZCOMMON {
 
     /**
      * 数字转换为携带单位的字符串
-     * @param num 
-     * @param fixedPoint 
-     * @returns 
+     * @param num
+     * @param fixedPoint
+     * @returns
      */
     export function number2UnitStr(num: number, fixedPoint: number = 1): string {
         let digit: number = 0;
@@ -301,7 +301,7 @@ export namespace SZCOMMON {
 
     /**
      * 洗牌打乱
-     * @param array 
+     * @param array
      */
     export function shuffle<T>(array: T[]) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -312,8 +312,8 @@ export namespace SZCOMMON {
 
     /**
      * 角度转弧度
-     * @param angle 
-     * @returns 
+     * @param angle
+     * @returns
      */
     export function angle2Radian(angle: number): number {
         return angle * Math.PI / 180;
@@ -321,8 +321,8 @@ export namespace SZCOMMON {
 
     /**
      * 弧度转角度
-     * @param radian 
-     * @returns 
+     * @param radian
+     * @returns
      */
     export function radian2Angle(radian: number): number {
         return radian * 180 / Math.PI;
