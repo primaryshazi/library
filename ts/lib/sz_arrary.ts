@@ -65,7 +65,7 @@ export abstract class SZArray<T> {
         }
 
         if (c < this.data_.length) {
-            this.data_.length = c;
+            this.data_.length = Math.max(c, 1);
         } else {
             this.data_.push(...new Array<SZDEF.ElemType<T>>(c - this.data_.length).fill(null));
         }
@@ -88,6 +88,6 @@ export abstract class SZArray<T> {
      * 重新扩容
      */
     protected expandCapacity() {
-        this.data_.push(...new Array<SZDEF.ElemType<T>>(Math.ceil(this.data_.length * (SZDEF.DEFAULT_GROWTH_FACTOR - 1))).fill(null));
+        this.data_.push(...new Array<SZDEF.ElemType<T>>(Math.max(Math.ceil(this.data_.length * (SZDEF.DEFAULT_GROWTH_FACTOR - 1)), 1)).fill(null));
     }
 }
