@@ -373,7 +373,7 @@ export namespace SZDATE {
      * @param ms
      */
     export function getCurMonthDays(ms: number) {
-        return getPrevDay(str2time((getNextMonth(ms) * 100 + 1).toString(), "%Y%M%D")) % 100;
+        return getPrevDay(str2time((getNextMonth(ms) * 100 + 1).toString(), "%YY%MM%DD")) % 100;
     }
 
     /**
