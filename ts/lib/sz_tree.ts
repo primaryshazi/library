@@ -78,7 +78,7 @@ export class SZBinaryTree<K, V> {
     }
 
     /**
-     * 构建AVL树
+     * 构建二叉树
      * @param compare 排序函数
      */
     public constructor(compare: SZCOMMON.Compare<K> = SZCOMMON.less) {

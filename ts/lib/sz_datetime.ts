@@ -13,7 +13,7 @@ export namespace SZDATE {
      * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
      * @returns
      */
-    export function countdownFormat(ms: number, format: string = "%D %h:%m:%s") {
+    export function countdownFormat(ms: number, format: string = "%DD %hh:%mm:%ss") {
         if (format.length == 0) {
             return "";
         }
@@ -26,17 +26,17 @@ export namespace SZDATE {
         let second = s % 60;
         let micsecond = ms % 1000;
 
-        return format.replace(/(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, D, h, m, s, z) => {
+        return format.replace(/(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})/g, (match, D, h, m, s, z) => {
             if (D) {
-                return day.toString();
+                return day.toString().padStart(D.length - 1, "0");
             } else if (h) {
-                return hour.toString().padStart(2, "0");
+                return hour.toString().padStart(h.length - 1, "0");
             } else if (m) {
-                return min.toString().padStart(2, "0");
+                return min.toString().padStart(m.length - 1, "0");
             } else if (s) {
-                return second.toString().padStart(2, "0");
+                return second.toString().padStart(s.length - 1, "0");
             } else if (z) {
-                return micsecond.toString().padStart(3, "0");
+                return micsecond.toString().padStart(z.length - 1, "0");
             } else {
                 return match;
             }
@@ -46,31 +46,31 @@ export namespace SZDATE {
     /**
      * 时间格式化为字符串
      * @param ms
-     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
      * @returns
      */
-    export function time2str(ms: number, format: string = "%Y-%M-%D %h:%m:%s"): string {
+    export function time2str(ms: number, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
         if (format.length == 0) {
             return "";
         }
 
         let date = new Date(ms);
 
-        return format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)/g, (match, Y, M, D, h, m, s, z) => {
+        return format.replace(/(%Y{1,4})|(%M{1,2})|(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})/g, (match, Y, M, D, h, m, s, z) => {
             if (Y) {
-                return date.getFullYear().toString().padStart(4, "0");
+                return date.getFullYear().toString().padStart(Y.length - 1, "0");
             } else if (M) {
-                return (date.getMonth() + 1).toString().padStart(2, "0");
+                return (date.getMonth() + 1).toString().padStart(M.length - 1, "0");
             } else if (D) {
-                return date.getDate().toString().padStart(2, "0");
+                return date.getDate().toString().padStart(D.length - 1, "0");
             } else if (h) {
-                return date.getHours().toString().padStart(2, "0");
+                return date.getHours().toString().padStart(h.length - 1, "0");
             } else if (m) {
-                return date.getMinutes().toString().padStart(2, "0");
+                return date.getMinutes().toString().padStart(m.length - 1, "0");
             } else if (s) {
-                return date.getSeconds().toString().padStart(2, "0");
+                return date.getSeconds().toString().padStart(s.length - 1, "0");
             } else if (z) {
-                return date.getMilliseconds().toString().padStart(3, "0");
+                return date.getMilliseconds().toString().padStart(z.length - 1, "0");
             } else {
                 return match;
             }
@@ -80,10 +80,10 @@ export namespace SZDATE {
     /**
      * 字符串反格式化为时间
      * @param str
-     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
      * @returns
      */
-    export function str2date(str: string, format: string = "%Y-%M-%D %h:%m:%s"): Date {
+    export function str2date(str: string, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): Date {
         if (str.length == 0 || format.length == 0) {
             return new Date(0);
         }
@@ -91,36 +91,36 @@ export namespace SZDATE {
         let idxs = [0, 0, 0, 0, 0, 0, 0];
 
         let index: number = 1;
-        let regFormat: string = format.replace(/(%Y)|(%M)|(%D)|(%h)|(%m)|(%s)|(%z)|(\\)|(\()|(\))|(\[)|(\])|(\{)|(\})|(\^)|(\$)|(\?)|(\+)|(\|)|(\*)|(\.)/g,
+        let regFormat: string = format.replace(/(%Y{1,4})|(%M{1,2})|(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})|(\\)|(\()|(\))|(\[)|(\])|(\{)|(\})|(\^)|(\$)|(\?)|(\+)|(\|)|(\*)|(\.)/g,
             (match, Y, M, D, h, m, s, z, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14) => {
                 if (Y) {
                     idxs[0] = index;
                     index++;
-                    return "(\\d{4})";
+                    return "(\\d{1,4})";
                 } else if (M) {
                     idxs[1] = index;
                     index++;
-                    return "(\\d{2})";
+                    return "(\\d{1,2})";
                 } else if (D) {
                     idxs[2] = index;
                     index++;
-                    return "(\\d{2})";
+                    return "(\\d{1,2})";
                 } else if (h) {
                     idxs[3] = index;
                     index++;
-                    return "(\\d{2})";
+                    return "(\\d{1,2})";
                 } else if (m) {
                     idxs[4] = index;
                     index++;
-                    return "(\\d{2})";
+                    return "(\\d{1,2})";
                 } else if (s) {
                     idxs[5] = index;
                     index++;
-                    return "(\\d{2})";
+                    return "(\\d{1,2})";
                 } else if (z) {
                     idxs[6] = index;
                     index++;
-                    return "(\\d{3})";
+                    return "(\\d{1,3})";
                 } else if (x1) {
                     return "\\\\";
                 } else if (x2) {
@@ -174,20 +174,20 @@ export namespace SZDATE {
     /**
      * 字符串反格式化为时间
      * @param str
-     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
      * @returns
      */
-    export function str2time(str: string, format: string = "%Y-%M-%D %h:%m:%s"): number {
+    export function str2time(str: string, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): number {
         let dt = str2date(str, format).getTime();
         return dt;
     }
 
     /**
      * 当前时间格式化为时间
-     * @param format %Y:年 %M:月 %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
      * @returns
      */
-    export function now2str(format: string = "%Y-%M-%D %h:%m:%s"): string {
+    export function now2str(format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
         return time2str(Date.now(), format);
     }
 
