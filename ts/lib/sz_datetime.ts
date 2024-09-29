@@ -178,7 +178,7 @@ export namespace SZDATE {
      * @returns
      */
     export function str2time(str: string, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): number {
-        let dt = str2date(str, format).getTime();
+        let dt = SZDATE.str2date(str, format).getTime();
         return dt;
     }
 
@@ -188,7 +188,7 @@ export namespace SZDATE {
      * @returns
      */
     export function now2str(format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
-        return time2str(Date.now(), format);
+        return SZDATE.time2str(Date.now(), format);
     }
 
     /**
@@ -210,12 +210,12 @@ export namespace SZDATE {
      */
     export function getNextYear(ms: number, next: number = 1): number {
         if (next == 0) {
-            return getYear(ms);
+            return SZDATE.getYear(ms);
         } else if (next < 0) {
-            return getPrevYear(ms, -next);
+            return SZDATE.getPrevYear(ms, -next);
         }
 
-        let nextYear = getYear(ms) + next;
+        let nextYear = SZDATE.getYear(ms) + next;
         if (nextYear >= 9999) {
             return 9999;
         } else if (nextYear < 1970) {
@@ -232,12 +232,12 @@ export namespace SZDATE {
      */
     export function getPrevYear(ms: number, prev: number = 1): number {
         if (prev == 0) {
-            return getYear(ms);
+            return SZDATE.getYear(ms);
         } else if (prev < 0) {
-            return getNextYear(ms, -prev);
+            return SZDATE.getNextYear(ms, -prev);
         }
 
-        let prevYear = getYear(ms) - prev;
+        let prevYear = SZDATE.getYear(ms) - prev;
         if (prevYear > 9999) {
             return 9999;
         } else if (prevYear <= 1970) {
@@ -265,12 +265,12 @@ export namespace SZDATE {
      */
     export function getNextMonth(ms: number, next: number = 1): number {
         if (next == 0) {
-            return getMonth(ms);
+            return SZDATE.getMonth(ms);
         } else if (next < 0) {
-            return getPrevMonth(ms, -next);
+            return SZDATE.getPrevMonth(ms, -next);
         }
 
-        let cur = getMonth(ms);
+        let cur = SZDATE.getMonth(ms);
 
         let year = Math.floor(cur / 100);
         let month = cur % 100;
@@ -304,12 +304,12 @@ export namespace SZDATE {
      */
     export function getPrevMonth(ms: number, prev: number = 1): number {
         if (prev == 0) {
-            return getMonth(ms);
+            return SZDATE.getMonth(ms);
         } else if (prev < 0) {
-            return getNextMonth(ms, -prev);
+            return SZDATE.getNextMonth(ms, -prev);
         }
 
-        let cur = getMonth(ms);
+        let cur = SZDATE.getMonth(ms);
 
         let year = Math.floor(cur / 100);
         let month = cur % 100;
@@ -353,7 +353,7 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getNextDay(ms: number, next: number = 1): number {
-        let cur = getDay(ms + 86400000 * next);
+        let cur = SZDATE.getDay(ms + 86400000 * next);
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
@@ -364,16 +364,54 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getPrevDay(ms: number, prev: number = 1): number {
-        let cur = getDay(ms - 86400000 * prev);
+        let cur = SZDATE.getDay(ms - 86400000 * prev);
         return Math.max(19700101, Math.min(99991231, cur));
+    }
+
+    /**
+     * 获得当前是周几
+     * @returns [1-7] => 1:周一, 2:周二, 3:周三, 4:周四, 5:周五, 6:周六 7:周日
+     */
+    export function getDateWeek(ms: number): number {
+        const date = new Date(ms);
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        if (month < 3) {
+            month += 12;
+            year--;
+        }
+
+        const c = Math.floor(year / 100);
+        const y = year % 100;
+        const m = month;
+        const d = day;
+        const w = (y + Math.floor(y / 4) + Math.floor(c / 4) - 2 * c + Math.floor(26 * (m + 1) / 10) + d - 1) % 7;
+
+        return [7, 1, 2, 3, 4, 5, 6][w];
+    }
+
+    /**
+     * 获取周一的日期
+     * @param ms
+     * @returns
+     */
+    export function getMondayDate(ms: number): number {
+        let cur_week = SZDATE.getDateWeek(ms);
+        if (cur_week == 1) {
+            return SZDATE.getDay(ms);
+        }
+
+        return SZDATE.getPrevDay(ms, cur_week - 1);
     }
 
     /**
      * 获得当前月有多少天
      * @param ms
      */
-    export function getCurMonthDays(ms: number) {
-        return getPrevDay(str2time((getNextMonth(ms) * 100 + 1).toString(), "%YY%MM%DD")) % 100;
+    export function getMonthDays(ms: number) {
+        return SZDATE.getPrevDay(SZDATE.str2time((SZDATE.getNextMonth(ms) * 100 + 1).toString(), "%YY%MM%DD")) % 100;
     }
 
     /**
