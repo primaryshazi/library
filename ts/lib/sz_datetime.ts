@@ -10,7 +10,7 @@ export namespace SZDATE {
     /**
      * 倒计时格式化
      * @param ms
-     * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param format %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
      * @returns
      */
     export function countdownFormat(ms: number, format: string = "%DD %hh:%mm:%ss") {
