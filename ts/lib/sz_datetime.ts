@@ -18,29 +18,53 @@ export namespace SZDATE {
             return "";
         }
 
-        const s = Math.floor(ms / 1000);
+        const sec = Math.floor(ms / 1000);
+        const components: { [key: string]: { str: string, length: number } } = {
+            "D": { str: Math.floor(sec / 86400).toString(), length: 2 },
+            "h": { str: Math.floor(sec % 86400 / 3600).toString(), length: 2 },
+            "m": { str: Math.floor(sec % 3600 / 60).toString(), length: 2 },
+            "s": { str: (sec % 60).toString(), length: 2 },
+            "z": { str: (ms % 1000).toString(), length: 3 },
+        };
 
-        let day = Math.floor(s / 86400);
-        let hour = Math.floor(s % 86400 / 3600);
-        let min = Math.floor(s % 3600 / 60);
-        let second = s % 60;
-        let micsecond = ms % 1000;
+        let result = "";
+        let i = 0;
 
-        return format.replace(/(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})/g, (match, D, h, m, s, z) => {
-            if (D) {
-                return day.toString().padStart(D.length - 1, "0");
-            } else if (h) {
-                return hour.toString().padStart(h.length - 1, "0");
-            } else if (m) {
-                return min.toString().padStart(m.length - 1, "0");
-            } else if (s) {
-                return second.toString().padStart(s.length - 1, "0");
-            } else if (z) {
-                return micsecond.toString().padStart(z.length - 1, "0");
+        while (i < format.length) {
+            if (format[i] === '%' && i + 1 < format.length) {
+                let ch = format[i + 1];
+                switch (ch) {
+                    case 'D':
+                    case 'h':
+                    case 'm':
+                    case 's':
+                    case 'z': {
+                        const value = components[ch];
+
+                        i++;
+                        let len = 1;
+                        while (i < format.length && len <= value.length && format[i] === ch) {
+                            len++;
+                            i++;
+                        }
+
+                        result += `${value.str}`.padStart(len - 1, "0");
+
+                        break;
+                    }
+                    default: {
+                        result += format[i];
+                        i++;
+                        break;
+                    }
+                }
             } else {
-                return match;
+                result += format[i];
+                i++;
             }
-        });
+        }
+
+        return result;
     }
 
     /**
@@ -50,31 +74,62 @@ export namespace SZDATE {
      * @returns
      */
     export function time2str(ms: number, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
-        if (format.length == 0) {
+        if (format.length === 0) {
             return "";
         }
 
-        let date = new Date(ms);
+        const date = new Date(ms);
 
-        return format.replace(/(%Y{1,4})|(%M{1,2})|(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})/g, (match, Y, M, D, h, m, s, z) => {
-            if (Y) {
-                return date.getFullYear().toString().padStart(Y.length - 1, "0");
-            } else if (M) {
-                return (date.getMonth() + 1).toString().padStart(M.length - 1, "0");
-            } else if (D) {
-                return date.getDate().toString().padStart(D.length - 1, "0");
-            } else if (h) {
-                return date.getHours().toString().padStart(h.length - 1, "0");
-            } else if (m) {
-                return date.getMinutes().toString().padStart(m.length - 1, "0");
-            } else if (s) {
-                return date.getSeconds().toString().padStart(s.length - 1, "0");
-            } else if (z) {
-                return date.getMilliseconds().toString().padStart(z.length - 1, "0");
+        const components: { [key: string]: { str: string, length: number } } = {
+            "Y": { str: date.getFullYear().toString(), length: 4 },
+            "M": { str: (date.getMonth() + 1).toString(), length: 2 },
+            "D": { str: date.getDate().toString(), length: 2 },
+            "h": { str: date.getHours().toString(), length: 2 },
+            "m": { str: date.getMinutes().toString(), length: 2 },
+            "s": { str: date.getSeconds().toString(), length: 2 },
+            "z": { str: date.getMilliseconds().toString(), length: 3 },
+        };
+
+        let result = "";
+        let i = 0;
+
+        while (i < format.length) {
+            if (format[i] === '%' && i + 1 < format.length) {
+                let ch = format[i + 1];
+                switch (ch) {
+                    case 'Y':
+                    case 'M':
+                    case 'D':
+                    case 'h':
+                    case 'm':
+                    case 's':
+                    case 'z': {
+                        const value = components[ch];
+
+                        i++;
+                        let len = 1;
+                        while (i < format.length && len <= value.length && format[i] === ch) {
+                            len++;
+                            i++;
+                        }
+
+                        result += `${value.str}`.padStart(len - 1, "0");
+
+                        break;
+                    }
+                    default: {
+                        result += format[i];
+                        i++;
+                        break;
+                    }
+                }
             } else {
-                return match;
+                result += format[i];
+                i++;
             }
-        });
+        }
+
+        return result;
     }
 
     /**
