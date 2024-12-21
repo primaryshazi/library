@@ -1,7 +1,7 @@
 export namespace SZDATE {
     /**
      * 获取单调时间
-     * @returns
+     * @returns 毫秒
      */
     export function steadyMs(): number {
         return performance.now() | 0;
@@ -11,9 +11,9 @@ export namespace SZDATE {
      * 倒计时格式化
      * @param ms
      * @param format %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
-     * @returns
+     * @returns 格式化后的字符串
      */
-    export function countdownFormat(ms: number, format: string = "%DD %hh:%mm:%ss") {
+    export function countdownFormat(ms: number, format: string = "%DD %hh:%mm:%ss"): string {
         if (format.length == 0) {
             return "";
         }
@@ -71,7 +71,7 @@ export namespace SZDATE {
      * 时间格式化为字符串
      * @param ms
      * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
-     * @returns
+     * @returns 格式化后的字符串
      */
     export function time2str(ms: number, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
         if (format.length === 0) {
@@ -136,7 +136,7 @@ export namespace SZDATE {
      * 字符串反格式化为时间
      * @param str
      * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
-     * @returns
+     * @returns Date
      */
     export function str2date(str: string, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): Date {
         if (str.length == 0 || format.length == 0) {
@@ -230,7 +230,7 @@ export namespace SZDATE {
      * 字符串反格式化为时间
      * @param str
      * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
-     * @returns
+     * @returns 毫秒
      */
     export function str2time(str: string, format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): number {
         let dt = SZDATE.str2date(str, format).getTime();
@@ -240,7 +240,7 @@ export namespace SZDATE {
     /**
      * 当前时间格式化为时间
      * @param format %YYYY:年 %MM:月 %DD:日 %hh:时 %mm: 分 %ss:秒 %zzz:毫秒
-     * @returns
+     * @returns 格式化后的字符串
      */
     export function now2str(format: string = "%YYYY-%MM-%DD %hh:%mm:%ss"): string {
         return SZDATE.time2str(Date.now(), format);
@@ -249,7 +249,7 @@ export namespace SZDATE {
     /**
      * 获取当前年份
      * @param ms
-     * @returns 9999
+     * @returns [1970, 9999]
      */
     export function getYear(ms: number): number {
         let dt = new Date(ms);
@@ -304,7 +304,7 @@ export namespace SZDATE {
     /**
      * 获取当前月份
      * @param ms
-     * @returns 202201
+     * @returns [197001, 999912]
      */
     export function getMonth(ms: number): number {
         let dt = new Date(ms);
@@ -393,7 +393,7 @@ export namespace SZDATE {
     /**
      * 获取当前日期
      * @param ms
-     * @returns 20220103
+     * @returns [19700101, 99991231]
      */
     export function getDay(ms: number): number {
         let dt = new Date(ms);
@@ -450,7 +450,7 @@ export namespace SZDATE {
     /**
      * 获取周一的日期
      * @param ms
-     * @returns
+     * @returns [19700101, 99991231]
      */
     export function getMondayDate(ms: number): number {
         let cur_week = SZDATE.getDateWeek(ms);
@@ -464,8 +464,9 @@ export namespace SZDATE {
     /**
      * 获得当前月有多少天
      * @param ms
+     * @returns [28, 31]
      */
-    export function getMonthDays(ms: number) {
+    export function getMonthDays(ms: number): number {
         return SZDATE.getPrevDay(SZDATE.str2time((SZDATE.getNextMonth(ms) * 100 + 1).toString(), "%YY%MM%DD")) % 100;
     }
 
@@ -473,6 +474,7 @@ export namespace SZDATE {
      * 获取两天之间的时间间隔
      * @param startMs
      * @param endMs
+     * @returns [-1, ~]
      */
     export function getDayDiff(startMs: number, endMs: number): number {
         if (endMs < startMs || startMs < 0 || endMs < 0) {
