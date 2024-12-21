@@ -308,4 +308,115 @@ export namespace SZCOMMON {
         return radian * 180 / Math.PI;
     }
 
-} // namespace szutils
+    /**
+     * 判断两个数组是否相同
+     * @param a
+     * @param b
+     * @returns
+     */
+    export function isSameArray<T>(a: Array<T>, b: Array<T>): boolean {
+        if (a.length != b.length) {
+            return false;
+        }
+
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 平均分布整数
+     * @param value 目标值
+     * @param num 数量
+     * @param offsetRatio 波动比例
+     * @returns 结果数组
+     */
+    export function distributeInteger(value: number, num: number, offsetRatio: number = 0.1): Array<number> {
+        value = Math.max(1, Math.floor(value));
+        num = Math.max(1, Math.floor(num));
+        offsetRatio = Math.max(0, Math.min(1, offsetRatio));
+
+        if (num == value) {
+            return new Array<number>(num).fill(1);
+        }
+
+        let result = new Array<number>();
+        for (let i = 0; i < num; i++) {
+            let avg = value / num;
+            let v = avg * (1 - offsetRatio + offsetRatio * 2 * Math.random());
+            if (Math.random() < 0.5) {
+                result.push(Math.floor(v));
+            } else {
+                result.push(Math.ceil(v));
+            }
+        }
+
+        while (true) {
+            let diff = result.reduce((a, b) => a + b, 0) - value;
+            let step = Math.max(1, Math.abs(Math.floor(diff / num)));
+
+            if (diff > 0) {
+                result.sort((a, b) => b - a);
+                for (let i = 0; i < result.length && diff > 0; i++) {
+                    if (result[i] >= step) {
+                        result[i] -= step;
+                        diff -= step;
+                    }
+                }
+            } else if (diff < 0) {
+                result.sort((a, b) => a - b);
+                for (let i = 0; i < result.length && diff < 0; i++) {
+                    result[i] += step;
+                    diff += step;
+                }
+            } else {
+                break;
+            }
+        }
+
+        SZCOMMON.shuffle(result);
+
+        return result;
+    }
+
+    /**
+     * 深拷贝
+     * @param value
+     * @returns
+     */
+    export function deepClone<T>(value: T): T {
+        // 空
+        if (!value) {
+            return value;
+        }
+
+        // 数组
+        if (Array.isArray(value)) {
+            return value.map((item) => SZCOMMON.deepClone(item)) as unknown as T;
+        }
+
+        // 日期
+        if (value instanceof Date) {
+            return new Date(value) as unknown as T;
+        }
+
+        // 普通对象
+        if (typeof value === 'object') {
+            let pObject = value as Object;
+            let pValue = Object.fromEntries(
+                Object.entries(value).map(([k, v]: [string, any]) => {
+                    return [k, SZCOMMON.deepClone(v)];
+                })
+            ) as unknown as T;
+            Object.setPrototypeOf(pValue, Object.getPrototypeOf(pObject));
+            return pValue;
+        }
+
+        // 基本类型
+        return value;
+    }
+} // namespace szcommon

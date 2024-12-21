@@ -146,8 +146,8 @@ export namespace SZDATE {
         let idxs = [0, 0, 0, 0, 0, 0, 0];
 
         let index: number = 1;
-        let regFormat: string = format.replace(/(%Y{1,4})|(%M{1,2})|(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})|(\\)|(\()|(\))|(\[)|(\])|(\{)|(\})|(\^)|(\$)|(\?)|(\+)|(\|)|(\*)|(\.)/g,
-            (match, Y, M, D, h, m, s, z, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14) => {
+        let regFormat: string = format.replace(/(%Y{1,4})|(%M{1,2})|(%D{1,2})|(%h{1,2})|(%m{1,2})|(%s{1,2})|(%z{1,3})|([\\\/\|\!\$\^\*\(\)\[\]\{\}\!\?\.\+])/g,
+            (match, Y, M, D, h, m, s, z, x) => {
                 if (Y) {
                     idxs[0] = index;
                     index++;
@@ -176,34 +176,8 @@ export namespace SZDATE {
                     idxs[6] = index;
                     index++;
                     return "(\\d{1,3})";
-                } else if (x1) {
-                    return "\\\\";
-                } else if (x2) {
-                    return "\\(";
-                } else if (x3) {
-                    return "\\)";
-                } else if (x4) {
-                    return "\\[";
-                } else if (x5) {
-                    return "\\]";
-                } else if (x6) {
-                    return "\\{";
-                } else if (x7) {
-                    return "\\}"
-                } else if (x8) {
-                    return "\\^";
-                } else if (x9) {
-                    return "\\$";
-                } else if (x10) {
-                    return "\\?";
-                } else if (x11) {
-                    return "\\+";
-                } else if (x12) {
-                    return "\\|";
-                } else if (x13) {
-                    return "\\*"
-                } else if (x14) {
-                    return "\\."
+                } else if (x) {
+                    return `\\${x}`;
                 }
 
                 return match;
