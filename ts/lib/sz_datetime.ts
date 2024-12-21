@@ -441,7 +441,11 @@ export namespace SZDATE {
      * @returns [28, 31]
      */
     export function getMonthDays(ms: number): number {
-        return SZDATE.getPrevDay(SZDATE.str2time((SZDATE.getNextMonth(ms) * 100 + 1).toString(), "%YYYY%MM%DD")) % 100;
+        let date = new Date(ms);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const days = new Date(year, month, 0).getDate();
+        return days;
     }
 
     /**
