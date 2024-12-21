@@ -370,8 +370,8 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getDay(ms: number): number {
-        let dt = new Date(ms);
-        let cur = dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+        const dt = new Date(ms);
+        const cur = dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
@@ -382,7 +382,7 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getNextDay(ms: number, next: number = 1): number {
-        let cur = SZDATE.getDay(ms + 86400000 * next);
+        const cur = SZDATE.getDay(ms + 86400000 * next);
         return Math.max(19700101, Math.min(99991231, cur));
     }
 
@@ -393,32 +393,8 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getPrevDay(ms: number, prev: number = 1): number {
-        let cur = SZDATE.getDay(ms - 86400000 * prev);
+        const cur = SZDATE.getDay(ms - 86400000 * prev);
         return Math.max(19700101, Math.min(99991231, cur));
-    }
-
-    /**
-     * 获得当前是周几
-     * @returns [1-7] => 1:周一, 2:周二, 3:周三, 4:周四, 5:周五, 6:周六 7:周日
-     */
-    export function getDateWeek(ms: number): number {
-        const date = new Date(ms);
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        let day = date.getDate();
-
-        if (month < 3) {
-            month += 12;
-            year--;
-        }
-
-        const c = Math.floor(year / 100);
-        const y = year % 100;
-        const m = month;
-        const d = day;
-        const w = (y + Math.floor(y / 4) + Math.floor(c / 4) - 2 * c + Math.floor(26 * (m + 1) / 10) + d - 1) % 7;
-
-        return [7, 1, 2, 3, 4, 5, 6][w];
     }
 
     /**
@@ -427,12 +403,13 @@ export namespace SZDATE {
      * @returns [19700101, 99991231]
      */
     export function getMonday(ms: number): number {
-        let curWeek = SZDATE.getDateWeek(ms);
-        if (curWeek == 1) {
-            return SZDATE.getDay(ms);
+        const date = new Date(ms);
+        const week = date.getDay();
+        if (week == 1) {
+            return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
         }
 
-        return SZDATE.getPrevDay(ms, curWeek - 1);
+        return SZDATE.getPrevDay(ms, week == 0 ? 6 : week - 1);
     }
 
     /**
@@ -441,7 +418,7 @@ export namespace SZDATE {
      * @returns [28, 31]
      */
     export function getMonthDays(ms: number): number {
-        let date = new Date(ms);
+        const date = new Date(ms);
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         const days = new Date(year, month, 0).getDate();
@@ -455,15 +432,7 @@ export namespace SZDATE {
      * @returns [-1, ~]
      */
     export function getDayDiff(startMs: number, endMs: number): number {
-        if (endMs < startMs || startMs < 0 || endMs < 0) {
-            return -1;
-        }
-
-        let startDate = new Date(startMs);
-        let endDate = new Date(endMs);
-        let startZeroMs = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
-        let endZeroMs = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
-
-        return Math.floor((endZeroMs - startZeroMs) / 86400000);
+        const diffMs = endMs - startMs;
+        return Math.floor(diffMs / 86400000);
     }
 } // namespace SZDATE
