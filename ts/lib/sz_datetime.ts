@@ -42,13 +42,13 @@ export namespace SZDATE {
                         const value = components[ch];
 
                         i++;
-                        let len = 1;
-                        while (i < format.length && len <= value.length && format[i] === ch) {
+                        let len = 0;
+                        while (i < format.length && len < value.length && format[i] === ch) {
                             len++;
                             i++;
                         }
 
-                        result += `${value.str}`.padStart(len - 1, "0");
+                        result += `${value.str}`.padStart(len, "0");
 
                         break;
                     }
@@ -107,13 +107,13 @@ export namespace SZDATE {
                         const value = components[ch];
 
                         i++;
-                        let len = 1;
-                        while (i < format.length && len <= value.length && format[i] === ch) {
+                        let len = 0;
+                        while (i < format.length && len < value.length && format[i] === ch) {
                             len++;
                             i++;
                         }
 
-                        result += `${value.str}`.padStart(len - 1, "0");
+                        result += `${value.str}`.padStart(len, "0");
 
                         break;
                     }
