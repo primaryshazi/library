@@ -426,13 +426,13 @@ export namespace SZDATE {
      * @param ms
      * @returns [19700101, 99991231]
      */
-    export function getMondayDate(ms: number): number {
-        let cur_week = SZDATE.getDateWeek(ms);
-        if (cur_week == 1) {
+    export function getMonday(ms: number): number {
+        let curWeek = SZDATE.getDateWeek(ms);
+        if (curWeek == 1) {
             return SZDATE.getDay(ms);
         }
 
-        return SZDATE.getPrevDay(ms, cur_week - 1);
+        return SZDATE.getPrevDay(ms, curWeek - 1);
     }
 
     /**
@@ -441,7 +441,7 @@ export namespace SZDATE {
      * @returns [28, 31]
      */
     export function getMonthDays(ms: number): number {
-        return SZDATE.getPrevDay(SZDATE.str2time((SZDATE.getNextMonth(ms) * 100 + 1).toString(), "%YY%MM%DD")) % 100;
+        return SZDATE.getPrevDay(SZDATE.str2time((SZDATE.getNextMonth(ms) * 100 + 1).toString(), "%YYYY%MM%DD")) % 100;
     }
 
     /**
@@ -462,4 +462,4 @@ export namespace SZDATE {
 
         return Math.floor((endZeroMs - startZeroMs) / 86400000);
     }
-} // namespace sz
+} // namespace SZDATE
