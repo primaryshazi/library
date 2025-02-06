@@ -4,7 +4,7 @@ export namespace SZDATE {
      * @returns 毫秒
      */
     export function steadyMs(): number {
-        return performance.now() | 0;
+        return Math.floor(performance.now());
     }
 
     /**
