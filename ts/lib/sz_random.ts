@@ -21,6 +21,10 @@ export class SZLinearCongruentialGenerator {
         this.seed = (this.a * this.seed + this.c) % this.m;
         return this.seed / this.m;
     }
+
+    public range(start: number, end: number): number {
+        return this.next() * (end - start) + start;
+    }
 }
 
 /**
@@ -64,6 +68,10 @@ export class SZMersenneTwisterGenerator {
         y = y >>> 0;
 
         return y / 0xffffffff;
+    }
+
+    public range(start: number, end: number): number {
+        return this.next() * (end - start) + start;
     }
 
     private twist(): void {
@@ -114,6 +122,10 @@ export class SZCarrySubtractGenerator {
         }
 
         return this.y / this.m;
+    }
+
+    public range(start: number, end: number): number {
+        return this.next() * (end - start) + start;
     }
 }
 
@@ -317,5 +329,72 @@ export class SZIntegerListDistributionGenerator {
         }
 
         return result;
+    }
+}
+
+/**
+ * 正态分布随机数生成
+ * 默认范围[0, 1)
+ */
+export class SZNormalDistributionGenerator {
+    private seed: number;
+    private spare: number | null = null;
+
+    constructor(seed?: number) {
+        // 如果没有提供种子，使用时间戳作为默认种子
+        this.seed = seed ?? Math.floor(Date.now() * Math.random());
+    }
+
+    /** 线性同余生成器产生 [0,1) 的均匀分布 */
+    private nextUniform(): number {
+        const a = 1664525;
+        const c = 1013904223;
+        const m = 2 ** 32;
+        this.seed = (a * this.seed + c) % m;
+        return this.seed / m;
+    }
+
+    /**
+     * 生成正态分布随机数
+     * @returns
+     */
+    public next(): number {
+        // 使用 Box-Muller 变换生成标准正态分布
+        if (this.spare !== null) {
+            const result = this.spare;
+            this.spare = null;
+            return this.adjust(result);
+        }
+
+        let u: number, v: number, s: number;
+        do {
+            u = this.nextUniform() * 2 - 1; // 转换为 [-1, 1)
+            v = this.nextUniform() * 2 - 1;
+            s = u * u + v * v;
+        } while (s >= 1 || s === 0);
+
+        const mul = Math.sqrt(-2 * Math.log(s) / s);
+        const z0 = u * mul;  // 第一个正态分布值
+        this.spare = v * mul; // 保存第二个值备用
+
+        return this.adjust(z0);
+    }
+
+    /**
+     * 返回指定范围内的随机数
+     * @param start 最小值
+     * @param end 最大值
+     * @returns
+     */
+    public range(start: number, end: number): number {
+        return this.next() * (end - start) + start;
+    }
+
+    /** 将标准正态分布调整到 [0,1) 范围 */
+    private adjust(z: number): number {
+        // 调整参数：均值 0.5，标准差 0.15
+        const adjusted = z * 0.15 + 0.5;
+        // 截断到 [0, 1) 并防止精确等于 1
+        return Math.min(Math.max(adjusted, 0), 1 - Number.EPSILON);
     }
 }
