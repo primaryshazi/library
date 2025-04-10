@@ -20,11 +20,11 @@ export namespace SZDATE {
 
         const sec = Math.floor(ms / 1000);
         const components: { [key: string]: { str: string, length: number } } = {
-            "D": { str: Math.floor(sec / 86400).toString(), length: 2 },
-            "h": { str: Math.floor(sec % 86400 / 3600).toString(), length: 2 },
-            "m": { str: Math.floor(sec % 3600 / 60).toString(), length: 2 },
-            "s": { str: (sec % 60).toString(), length: 2 },
-            "z": { str: (ms % 1000).toString(), length: 3 },
+            "D": { str: `${Math.floor(sec / 86400)}`, length: 1 },
+            "h": { str: `${Math.floor(sec % 86400 / 3600)}`, length: 2 },
+            "m": { str: `${Math.floor(sec % 3600 / 60)}`, length: 2 },
+            "s": { str: `${sec % 60}`, length: 2 },
+            "z": { str: `${ms % 1000}`, length: 3 },
         };
 
         let result = "";
@@ -74,13 +74,13 @@ export namespace SZDATE {
         const date = new Date(ms);
 
         const components: { [key: string]: { str: string, length: number } } = {
-            "Y": { str: date.getFullYear().toString(), length: 4 },
-            "M": { str: (date.getMonth() + 1).toString(), length: 2 },
-            "D": { str: date.getDate().toString(), length: 2 },
-            "h": { str: date.getHours().toString(), length: 2 },
-            "m": { str: date.getMinutes().toString(), length: 2 },
-            "s": { str: date.getSeconds().toString(), length: 2 },
-            "z": { str: date.getMilliseconds().toString(), length: 3 },
+            "Y": { str: `${date.getFullYear()}`, length: 4 },
+            "M": { str: `${date.getMonth() + 1}`, length: 2 },
+            "D": { str: `${date.getDate()}`, length: 2 },
+            "h": { str: `${date.getHours()}`, length: 2 },
+            "m": { str: `${date.getMinutes()}`, length: 2 },
+            "s": { str: `${date.getSeconds()}`, length: 2 },
+            "z": { str: `${date.getMilliseconds()}`, length: 3 },
         };
 
         let result = "";

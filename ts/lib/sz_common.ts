@@ -75,13 +75,13 @@ export namespace SZCOMMON {
     };
 
     /**
-     * 生成范围内的随机数 [min, max]
+     * 生成范围内的随机数 [min, max)
      * @param min
      * @param max
      * @returns
      */
     export function randRangeInt(min: number, max: number): number {
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        return Math.floor(Math.random() * (max - min) + min);
     }
 
     /**
@@ -340,7 +340,7 @@ export namespace SZCOMMON {
         num = Math.max(1, Math.floor(num));
         offsetRatio = Math.max(0, Math.min(1, offsetRatio));
 
-        if (num == value) {
+        if (num >= value) {
             return new Array<number>(num).fill(1);
         }
 
@@ -362,7 +362,7 @@ export namespace SZCOMMON {
             if (diff > 0) {
                 result.sort((a, b) => b - a);
                 for (let i = 0; i < result.length && diff > 0; i++) {
-                    if (result[i] >= step) {
+                    if (result[i] > step) {
                         result[i] -= step;
                         diff -= step;
                     }
@@ -418,5 +418,28 @@ export namespace SZCOMMON {
 
         // 基本类型
         return value;
+    }
+
+    /**
+     * 裁剪字符串
+     * @param str
+     * @param chars
+     * @returns
+     */
+    export function trimString(str: string, chars: string = ' \t\n\r\f\v'): string {
+        let start = 0;
+        let end = str.length;
+
+        // 从左边裁剪
+        while (start < end && chars.indexOf(str[start]) >= 0) {
+            start++;
+        }
+
+        // 从右边裁剪
+        while (end > start && chars.indexOf(str[end - 1]) >= 0) {
+            end--;
+        }
+
+        return str.slice(start, end);
     }
 } // namespace szcommon
