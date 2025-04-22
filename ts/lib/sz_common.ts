@@ -282,10 +282,11 @@ export namespace SZCOMMON {
     /**
      * 洗牌打乱
      * @param array
+     * @param gen [0, 1)
      */
-    export function shuffle<T>(array: T[]) {
+    export function shuffle<T>(array: T[], gen: () => number = () => Math.random()) {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(gen() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
