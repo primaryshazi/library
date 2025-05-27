@@ -11,9 +11,10 @@ export namespace SZDATE {
      * 倒计时格式化
      * @param ms
      * @param format %D:日 %h:时 %m: 分 %s:秒 %z:毫秒
+     * @param isFillZero 是否填充0
      * @returns 格式化后的字符串
      */
-    export function countdownFormat(ms: number, format: string = "%D %h:%m:%s"): string {
+    export function countdownFormat(ms: number, format: string = "%D %h:%m:%s", isFillZero: boolean = true): string {
         if (format.length == 0) {
             return "";
         }
@@ -40,7 +41,11 @@ export namespace SZDATE {
                     case 's':
                     case 'z': {
                         const value = components[ch];
-                        result += `${value.str}`.padStart(value.length, "0");
+                        if (isFillZero) {
+                            result += `${value.str}`.padStart(value.length, "0");
+                        } else {
+                            result += `${value.str}`;
+                        }
 
                         i += 2;
                         break;
