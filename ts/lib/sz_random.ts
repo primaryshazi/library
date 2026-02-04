@@ -10,7 +10,7 @@ export class SZLinearCongruentialGenerator {
     private readonly c: number;
     private readonly m: number;
 
-    constructor(seed: number, a: number = 1664525, c: number = 1013904223, m: number = Math.pow(2, 32)) {
+    constructor(seed: number, a: number = 1664525, c: number = 1013904223, m: number = Math.pow(2, 16)) {
         this.seed = seed;
         this.a = a;
         this.c = c;
@@ -136,7 +136,7 @@ export class SZCarrySubtractGenerator {
  */
 export class SZDiscreteDistributionGenerator {
     // 随机数引擎
-    private gen_: SZLinearCongruentialGenerator;
+    private gen_: SZMersenneTwisterGenerator;
 
     // 原始概率列表
     private probabilities_: number[];
@@ -157,7 +157,7 @@ export class SZDiscreteDistributionGenerator {
             throw new Error("Probabilities must sum to a positive value");
         }
 
-        this.gen_ = new SZLinearCongruentialGenerator(seed);
+        this.gen_ = new SZMersenneTwisterGenerator(seed);
 
         let lastProb: number = 0;
         this.probabilities_ = probabilities.slice();
@@ -195,7 +195,7 @@ export class SZIntegerListDistributionGenerator {
     private readonly MIN_FLUCTUATION_RANGE = 0.0001;
 
     // 随机数引擎
-    private gen_: SZLinearCongruentialGenerator;
+    private gen_: SZMersenneTwisterGenerator;
 
     // 是否完全生成
     private bIsEntire_: boolean = false;
@@ -227,7 +227,7 @@ export class SZIntegerListDistributionGenerator {
             throw new Error("Probabilities must sum to a positive value");
         }
 
-        this.gen_ = new SZLinearCongruentialGenerator(seed);
+        this.gen_ = new SZMersenneTwisterGenerator(seed);
 
         this.bIsEntire_ = bIsEntire;
         this.summary_ = probabilities.length;

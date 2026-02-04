@@ -417,13 +417,24 @@ export namespace SZDATE {
     }
 
     /**
-     * 获取两天之间的时间间隔
-     * @param startMs
-     * @param endMs
-     * @returns [-1, ~]
+     * 获取两天之间的时间间隔（天数差）
+     * @param startMs 开始时间的毫秒时间戳
+     * @param endMs 结束时间的毫秒时间戳
+     * @returns 天数差，负数表示结束时间早于开始时间
      */
     export function getDayDiff(startMs: number, endMs: number): number {
-        const diffMs = endMs - startMs;
-        return Math.floor(diffMs / 86400000);
+        // 创建开始和结束的日期对象
+        const startDate = new Date(startMs);
+        const endDate = new Date(endMs);
+
+        // 将时间设置为当天的 00:00:00，避免时间部分影响天数计算
+        const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+        // 计算天数差
+        const diffMs = endDay.getTime() - startDay.getTime();
+        const dayDiff = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+        return dayDiff;
     }
 } // namespace SZDATE
